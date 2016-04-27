@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans  xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:jdbc="http://www.springframework.org/schema/jdbc"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:jpa="http://www.springframework.org/schema/data/jpa"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc-4.0.xsd
+		http://www.springframework.org/schema/context
+		http://www.springframework.org/schema/context/spring-context-4.0.xsd
+		http://www.springframework.org/schema/tx
+		http://www.springframework.org/schema/tx/spring-tx-4.0.xsd
+   		http://www.springframework.org/schema/data/jpa 
+   		http://www.springframework.org/schema/data/jpa/spring-jpa-1.3.xsd">
+     
+     
+     <context:component-scan base-package="com.scut.knowbook"/>
+	
+		
+    <!--定义数据源Bean，使用C3P0数据源实现 -->
+	<context:property-placeholder location="classpath:configs/properties/database.properties" /> 
+	<bean id="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource"
+		destroy-method="close">
+		<!--指定连接数据库的驱动 -->
+		<property name="driverClass" value="${jdbc.driverClassName}" />
+		<!--指定连接数据库的URL -->
+		<property name="jdbcUrl" value="${jdbc.url}" />
+		<!--指定连接数据库的用户名 -->
+		<property name="user" value="${jdbc.username}" />
+		<!--指定连接数据库的密码 -->
+		<property name="password" value="${jdbc.password}" />
+		
+		<property name="autoCommitOnClose" value="true" />
+		<property name="checkoutTimeout" value="${cpool.checkoutTimeout}" />
+		<!--指定连接数据库连接池的初始化连接数 -->
+		<property name="initialPoolSize" value="${cpool.minPoolSize}" />
+		<!--指定连接数据库连接池的最小连接数 -->
+		<property name="minPoolSize" value="${cpool.minPoolSize}" />
+		<!--指定连接数据库连接池的最大连接数 -->
+		<property name="maxPoolSize" value="${cpool.maxPoolSize}" />
+		<!--指定连接数据库连接池的连接的最大空闲时间 -->
+		<property name="maxIdleTime" value="${cpool.maxIdleTime}" />
+		<property name="acquireIncrement" value="${cpool.acquireIncrement}" />
+		<property name="maxIdleTimeExcessConnections" value="${cpool.maxIdleTimeExcessConnections}" />
+		
+		<property name="automaticTestTable" value="${cpool.automaticTestTable}" />
+		
+		<property name="idleConnectionTestPeriod" value="${cpool.idleConnectionTestPeriod}" />
+		<property name="preferredTestQuery" value="${cpool.preferredTestQuery}" />
+		
+        <property name="acquireRetryAttempts" value="${cpool.acquireRetryAttempts}" />
+        <property name="breakAfterAcquireFailure" value="true" />
+        <property name="testConnectionOnCheckout" value="true" />    
+	</bean>
+	
+	<bean id="entityManagerFactory" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
+		<property name="dataSource" ref="dataSource" />
+		<property name="persistenceUnitName" value="jpa_persistence"></property>
+		<property name="persistenceXmlLocation" value="classpath:configs/spring/jpa_persistence.xml"></property>
+		<property name="jpaVendorAdapter">
+			<bean class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter">
+				<property name="showSql" value="false" />
+				<property name="generateDdl" value="true" />
+			</bean>
+		</property>
+	</bean>
+
+	<bean id="jpaTransactionManager" class="org.springframework.orm.jpa.JpaTransactionManager">
+		<property name="entityManagerFactory" ref="entityManagerFactory"></property>
+	</bean>
+	
+	<!--定义注释驱动 -->
+	<tx:annotation-driven transaction-manager="jpaTransactionManager" />
+	
+	<!-- 需要在 <beans> 标签中增加对 jpa 命名空间的引用 --> 
+	 <jpa:repositories base-package="com.scut.knowbook.dao"
+	 entity-manager-factory-ref="entityManagerFactory" 
+	 transaction-manager-ref="jpaTransactionManager">
+	 </jpa:repositories>
+     
+</beans>

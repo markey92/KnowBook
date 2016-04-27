@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:javaee="http://java.sun.com/xml/ns/javaee" 
+   xmlns:web="http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd" version="2.5">  
+   <javaee:display-name>Archetype Created Web Application</javaee:display-name>
+
+<!-- 应用路径 -->
+    <context-param>
+	    <param-name>webAppRootKey</param-name>
+	    <param-value>/knowbook</param-value>
+	</context-param>
+	
+	<welcome-file-list>  
+    	<welcome-file>/index.jsp</welcome-file>  
+ 	 </welcome-file-list> 
+  
+	<context-param>
+	    <param-name>contextConfigLocation</param-name>
+	    <param-value>classpath:configs/spring/spring-context.xml</param-value>
+  	</context-param>
+  	<!-- log4j配置 -->
+	<context-param>
+    	<param-name>log4jConfigLocation</param-name>
+    	<param-value>classpath:configs/properties/log4j.properties</param-value>
+  	</context-param>
+  	
+<filter>
+    <filter-name>openEntityManagerInViewFilter</filter-name>
+    <filter-class>org.springframework.orm.jpa.support.OpenEntityManagerInViewFilter</filter-class>
+</filter>
+  <filter-mapping>
+    <filter-name>openEntityManagerInViewFilter</filter-name>
+    <url-pattern>/*</url-pattern>
+ </filter-mapping>
+
+  	<!-- spring的log4j监听器 -->
+	<listener>
+		<listener-class>org.springframework.web.util.Log4jConfigListener</listener-class>
+	</listener>
+  	<!-- spring监听 -->
+	<listener>
+    	<listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+  	</listener>
+  	<!-- spring view分发器 -->
+  	<servlet>
+	    <servlet-name>spring-servlet</servlet-name>
+	    <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+	    <init-param>
+	    <!-- spring上下文的配置 -->
+	        <param-name>contextConfigLocation</param-name>
+	        <param-value>/WEB-INF/spring-servlet.xml</param-value>
+		</init-param>
+	    <load-on-startup>1</load-on-startup>
+	</servlet>
+	<servlet-mapping>
+	    <servlet-name>spring-servlet</servlet-name>
+	    <url-pattern>/</url-pattern>
+  	</servlet-mapping>
+	
+
+  	<!-- 字符集 过滤器  -->
+	<filter>
+		<filter-name>CharacterEncodingFilter</filter-name>
+		<filter-class>org.springframework.web.filter.CharacterEncodingFilter</filter-class>
+		<init-param>
+		<param-name>encoding</param-name>
+		<param-value>UTF-8</param-value>
+		</init-param>
+		<init-param>
+		<param-name>forceEncoding</param-name>
+		<param-value>true</param-value>
+		</init-param>
+	</filter>
+	<filter-mapping>
+		<filter-name>CharacterEncodingFilter</filter-name>
+		<url-pattern>/*</url-pattern>
+	</filter-mapping>
+</web-app>

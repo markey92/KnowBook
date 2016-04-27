@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project-module
+  type="WEB"
+  name="KnowBook"
+  id="myeclipse.1460991612030"
+  context-root="/KnowBook"
+  j2ee-spec="5.0"
+  archive="KnowBook.war">
+  <attributes>
+    <attribute name="webrootdir" value="src/main/webapp" />
+  </attributes>
+</project-module>
+
