@@ -44,12 +44,12 @@ public class Seller_market extends BaseModel implements Serializable {
 	
 	@ManyToOne(targetEntity =User_info.class)
 //	@JoinColumn(name = "bookOwner_id", referencedColumnName = "PhoneNumber", nullable = false,insertable=false, updatable=false)
-	private Set<User_info> user_info=new HashSet<User_info>();
+	private User_info user_info;
 	
-	public Set<User_info> getUser_info() {
+	public User_info getUser_info() {
 		return user_info;
 	}
-	public void setUser_info(Set<User_info> user_info) {
+	public void setUser_info(User_info user_info) {
 		this.user_info = user_info;
 	}
 	public String getBookName() {
