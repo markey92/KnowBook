@@ -27,6 +27,6 @@ public interface IWishPlatformDao extends CrudRepository<Wish_platform, Long>, P
 	
 	public Page<Wish_platform> findAll(Pageable pageable);
     
-	@Query("select w frow Wish_platform w where w.bookClass = ?1")
+	@Query("select w from Wish_platform w where w.bookClass = ?1")
 	public Page<Wish_platform> findByTypeAndPage(String type, Pageable pageable);
 }

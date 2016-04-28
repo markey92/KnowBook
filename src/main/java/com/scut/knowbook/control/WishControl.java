@@ -48,6 +48,31 @@ public class WishControl {
 	private IWishPlatformService wishPlatformService;
 
 	/**
+	 * 按id查找某本确定的书
+	 */
+	@RequestMapping(value="/detailWant",method=RequestMethod.POST, produces = "text/html;charset=utf-8")
+	public @ResponseBody Object detailWant(@RequestParam long WantBookId, HttpServletRequest request, HttpServletResponse response)throws JsonGenerationException, JsonMappingException, IOException{
+
+		JsonPacked jsonPacked=new JsonPacked();
+		//获取session中的phoneNumber
+		String phoneNumber = (String) request.getSession().getAttribute("phoneNumber");
+		//检查参数phone_number是否为空
+		if (phoneNumber == null || StringUtils.isEmpty(phoneNumber)) {
+			logger.info("phone_number不存在");
+			jsonPacked.setResult("user,unlogined");
+			return jsonPacked;
+		}
+        if(WantBookId <= 0){
+			logger.info("WantBookId不存在");
+			jsonPacked.setResult("WantBookId,<=0");
+			return jsonPacked;
+        }
+	    Wish_platform wish_platform = wishPlatformService.findById(WantBookId);
+		jsonPacked.setResult("success");
+		jsonPacked.getResultSet().add(wish_platform);
+		return jsonPacked;
+	}
+	/**
 	 * 按类型查看所有心愿
 	 */
 	@RequestMapping(value="/fragmentWantSome",method=RequestMethod.POST, produces = "text/html;charset=utf-8")
