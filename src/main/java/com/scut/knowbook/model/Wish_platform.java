@@ -20,7 +20,7 @@ public class Wish_platform extends BaseModel implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 	
-	@Column(name="wisher_id", nullable= false, length = 11)
+	@Column(name="wisher_id", nullable = true, length = 11)
 	private String wisherId;
 	
 	@Column(name="book_name", nullable= false, length = 11)
@@ -38,14 +38,25 @@ public class Wish_platform extends BaseModel implements Serializable {
 	@Column(name="wish_location", nullable= false)
 	private String wishLocation;
 	
+	@Column(name="wish_pay", nullable= false)
+	private String wishPay="我唱歌给你听呀！么么哒";
+	
+	@ManyToOne(targetEntity =User_info.class)
+	private User_info user_info=new User_info();
+	
+	public String getWishPay() {
+		return wishPay;
+	}
+	public void setWishPay(String wishPay) {
+		this.wishPay = wishPay;
+	}
 	public String getWishLocation() {
 		return wishLocation;
 	}
 	public void setWishLocation(String wishLocation) {
 		this.wishLocation = wishLocation;
 	}
-	@ManyToOne(targetEntity =User_info.class)
-	private User_info user_info=new User_info();
+
 	
 	@JsonIgnore
 	public User_info getUser_info() {

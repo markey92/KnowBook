@@ -1,6 +1,10 @@
 package com.scut.knowbook.service.impl;
 
+import java.util.ArrayList;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.scut.knowbook.dao.IWishPlatformDao;
@@ -10,7 +14,7 @@ import com.scut.knowbook.service.IWishPlatformService;
 @Service("wishPlatformService")
 public class WishPlatformServiceImpl implements IWishPlatformService {
 
-//	@Autowired
+	@Autowired
 	private IWishPlatformDao wishPlatformDao;
 	
 	public Wish_platform findById(Long id) {
@@ -46,6 +50,18 @@ public class WishPlatformServiceImpl implements IWishPlatformService {
 	public void delete(Wish_platform wish_platform) {
 		// TODO Auto-generated method stub
 		this.wishPlatformDao.delete(wish_platform);
+	}
+
+	@SuppressWarnings("unchecked")
+	public Page<Wish_platform> findAllByPage(Pageable pageable) {
+		// TODO Auto-generated method stub
+		return wishPlatformDao.findAll(pageable);
+	}
+
+	public Page<Wish_platform> findByBookClassPage(String type,
+			Pageable pageable) {
+		// TODO Auto-generated method stub
+		return wishPlatformDao.findByTypeAndPage(type, pageable);
 	}
 
 }
