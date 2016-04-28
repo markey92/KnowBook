@@ -9,7 +9,7 @@ import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.catalina.connector.Request;
+import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.codehaus.jackson.JsonGenerationException;
 import org.codehaus.jackson.map.JsonMappingException;
@@ -136,6 +136,41 @@ public class LoginController {
 			jsonPacked.getResultSet().add(user_info);
 		}
 		logger.info("user_info:" + phoneNumber);
+		return jsonPacked;
+	}
+	/*
+	 * @author makai
+	 * 获取头像接口
+	 * 前端发起请求，无提交参数
+	 * 后台返回一个headPicture的url
+	 */
+	@RequestMapping(value="/myPicture", method = RequestMethod.GET,  produces = "text/html;charset=utf-8")
+	public @ResponseBody Object myPicture(HttpServletRequest request, HttpServletResponse response) throws JsonGenerationException, JsonMappingException, IOException{
+		
+		JsonPacked jsonPacked=new JsonPacked();
+		//获取session中的phoneNumber
+		String phoneNumber = (String) request.getSession().getAttribute("phoneNumber");
+		//检查参数phone_number是否为空
+		if (phoneNumber == null || StringUtils.isEmpty(phoneNumber)) {
+			logger.info("phone_number不存在");
+			jsonPacked.setResult("user,unlogined");
+			return jsonPacked;
+		}
+		User user = userService.findByPhoneNumber(phoneNumber);
+		if (user == null) {
+			logger.info("user不存在");
+			jsonPacked.setResult("user,null");
+			return jsonPacked;
+		}
+		User_info user_info = user.getUser_info();
+		String pictureUrl = user_info.getHeadPicture();
+		if (pictureUrl == null || StringUtils.isEmpty(pictureUrl)) {
+			logger.info("头像不存在");
+			jsonPacked.setResult("picture,null");
+			return jsonPacked;
+		}
+		jsonPacked.setResult("success");
+		jsonPacked.getResultSet().add(phoneNumber);
 		return jsonPacked;
 	}
 }
