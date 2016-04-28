@@ -35,6 +35,15 @@ public class Wish_platform extends BaseModel implements Serializable {
 	@Column(name="book_author", nullable= false, length = 11)
 	private String bookAuthor;
 	
+	@Column(name="wish_location", nullable= false)
+	private String wishLocation;
+	
+	public String getWishLocation() {
+		return wishLocation;
+	}
+	public void setWishLocation(String wishLocation) {
+		this.wishLocation = wishLocation;
+	}
 	@ManyToOne(targetEntity =User_info.class)
 	private User_info user_info=new User_info();
 	
