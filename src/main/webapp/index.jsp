@@ -8,15 +8,12 @@
 <html>
 <body>
 <h2>Hello World!</h2>
-<form action="<%=basePath %>showBook/createshowbook" method="post">
-<input type="text" name="phoneNumber" />
-<input type="text" name="bookName" />
-<input type="text" name="bookpicture" />
-<input type="text" name="bookAuthor" />
-<input type="text" name="bookClass" />
-<input type="text" name="bookSummary" />
-<input type="text" name="recommenReason" /> 
-<input type="submit" value="cha"/>
+<form action="<%=basePath %>showBook/writeshowbookSonComment" method="post">
+<!-- <input type="text" name="phoneNumber" />  -->
+id<input type="text" name="id" /><br/>
+commenterId<input type="text" name="commenterId" /><br/>
+commentContent<input type="text" name="commentContent" /><br/>
+<input type="submit" value="submit">
 </form>
 </body>
 </html>

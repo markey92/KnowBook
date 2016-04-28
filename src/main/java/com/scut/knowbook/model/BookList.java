@@ -28,7 +28,7 @@ public class BookList extends BaseModel implements Serializable {
 	@Column(name="creater_id", nullable= false)
 	private String createrId;
 	
-	@Column(name="book_id", nullable= false)
+	@Column(name="book_id", nullable= true)
 	private String bookId;
 	
 	@Column(name="booklist_name", nullable= false)
@@ -37,8 +37,8 @@ public class BookList extends BaseModel implements Serializable {
 	@ManyToMany(targetEntity=Recommen_books.class,cascade = {CascadeType.PERSIST, CascadeType.MERGE}, mappedBy = "bookList", fetch = FetchType.LAZY)
     public Set<Recommen_books> recommen_books=new HashSet<Recommen_books>();
     
-    @ManyToOne
-    private User user;
+    @ManyToMany
+    private Set<User> users=new HashSet<User>();
 	
 	public String getBookListName() {
 		return bookListName;
@@ -53,15 +53,14 @@ public class BookList extends BaseModel implements Serializable {
 	public void setBookId(String bookId) {
 		this.bookId = bookId;
 	}
-
-    @JsonIgnore
-	public User getUser() {
-		return user;
-	}
-	public void setUser(User user) {
-		this.user = user;
-	}
 	
+	@JsonIgnore
+	public Set<User> getUsers() {
+		return users;
+	}
+	public void setUsers(Set<User> users) {
+		this.users = users;
+	}
 	@JsonIgnore
 	public Set<Recommen_books> getRecommen_books() {
 		return recommen_books;

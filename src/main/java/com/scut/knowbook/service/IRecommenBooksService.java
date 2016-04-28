@@ -1,6 +1,9 @@
 package com.scut.knowbook.service;
 
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
 import com.scut.knowbook.model.Recommen_books;
 import com.scut.knowbook.model.User;
 
@@ -21,4 +24,9 @@ public interface IRecommenBooksService {
 	public Recommen_books save(Recommen_books recommen_books);
 	
 	public void delete(Recommen_books recommen_books);
+	
+	public Iterable<Recommen_books> findAll();
+	
+	public Page<Recommen_books> findAll(Pageable pageable);
+	
 }

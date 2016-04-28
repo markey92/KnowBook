@@ -12,6 +12,8 @@ import org.codehaus.jackson.JsonGenerationException;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.transaction.TransactionConfiguration;
@@ -19,10 +21,21 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.scut.knowbook.control.LoginController;
+import com.scut.knowbook.model.BookList;
+import com.scut.knowbook.model.Comments;
+import com.scut.knowbook.model.Recommen_books;
+import com.scut.knowbook.model.Son_comments;
 import com.scut.knowbook.model.User;
 import com.scut.knowbook.model.User_info;
 import com.scut.knowbook.model.OP.JsonPacked;
+import com.scut.knowbook.service.IBookListService;
+import com.scut.knowbook.service.ICommentsService;
+import com.scut.knowbook.service.IRecommenBooksService;
+import com.scut.knowbook.service.ISonCommentsService;
 import com.scut.knowbook.service.IUserService;
+import com.scut.knowbook.service.impl.BookListServiceImpl;
+import com.scut.knowbook.service.impl.RecommenBooksServiceImpl;
+import com.scut.knowbook.service.impl.SonCommentsServiceImpl;
 
 
 /** 声明用的是Spring的测试类 **/
@@ -41,21 +54,39 @@ public class TestLoginFunction {
 	@Resource(name = "userService")
 	private IUserService userService;
 	
+	@Resource(name="recommenBooksService")
+	private IRecommenBooksService recommenBooksService;
+	
+	@Resource(name="commentsService")
+	private ICommentsService commentsService;
+	
+	@Resource
+	private ISonCommentsService sonCommentsService;
+	
+	@Resource
+	private IBookListService bookListService;
+	
 	@Test
 	public void registe(){
-		String phoneNumber="18814122521";
-		String password="1";
-		JsonPacked jsonPacked=new JsonPacked();
-		User user=new User();
-		user.setPhoneNumber(phoneNumber);
-		user.setPassword(password);
-		
-		User_info user_info=new User_info();
-		user.setUser_info(user_info);
-		userService.save(user);
-		
-		jsonPacked.setResult("registe,success");
-		System.out.println(jsonPacked);
+		String phoneNumber="18814122529";
+		User user=userService.findByPhoneNumber(phoneNumber);
+		if(user==null){
+			System.out.println("null");
+		}
+		BookList bookList=new BookList();
+		bookList.setCreaterId(phoneNumber);
+		bookList.setBookListName("辣鸡");
+		bookList.getUsers().add(user);
+		System.out.println(bookList.getUsers().size());
+		bookListService.save(bookList);
+	}
+	
+	@Test
+	public void showBooklist(){
+		Page<BookList> booklists=bookListService.findAllBookList(new PageRequest(0, 7));
+		for(BookList booklist:booklists){
+			System.out.println(booklist.getBookListName());
+		}
 	}
 }
 	

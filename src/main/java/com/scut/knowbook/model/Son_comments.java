@@ -11,6 +11,8 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
+import org.codehaus.jackson.annotate.JsonIgnore;
+
 
 @Entity
 @Table(name="son_comments")
@@ -24,7 +26,20 @@ public class Son_comments extends BaseModel implements Serializable {
 	@ManyToOne
 	private Comments comments;
 	
-    public Comments getComments() {
+	
+	@ManyToOne(targetEntity=User.class)
+	private User user;
+	
+	@JsonIgnore
+    public User getUser() {
+		return user;
+	}
+	public void setUser(User user) {
+		this.user = user;
+	}
+	
+	@JsonIgnore
+	public Comments getComments() {
 		return comments;
 	}
 	public void setComments(Comments comments) {

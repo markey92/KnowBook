@@ -144,5 +144,11 @@ public class Recommen_books extends BaseModel implements Serializable {
 	public void setBookSummary(String bookSummary) {
 		this.bookSummary = bookSummary;
 	}
+	@Override
+	public String toString() {
+		return "Recommen_books [bookScore=" + bookScore + ", titleImage=" + titleImage + ", bookName=" + bookName
+				+ ", bookLocation=" + bookLocation + ", recommenReason=" + recommenReason + ", bookSummary="
+				+ bookSummary + ", getId()=" + getId() + "]";
+	}
 	
 }

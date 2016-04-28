@@ -1,6 +1,8 @@
 package com.scut.knowbook.service.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -11,7 +13,7 @@ import com.scut.knowbook.service.IBookListService;
 @Service("bookListService")
 public class BookListServiceImpl implements IBookListService {
 
-//	@Autowired(required=true)
+	@Autowired(required=true)
 	private IBookListDao bookListDao;
 
 	public BookList findById(Long id) {
@@ -39,6 +41,11 @@ public class BookListServiceImpl implements IBookListService {
 	public Iterable<BookList> findAll() {
 		// TODO Auto-generated method stub
 		return this.bookListDao.findAll();
+	}
+
+	public Page<BookList> findAllBookList(Pageable pageable) {
+		// TODO Auto-generated method stub
+		return this.bookListDao.findAllBookList(pageable);
 	}
 
 }

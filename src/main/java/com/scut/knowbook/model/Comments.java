@@ -12,6 +12,8 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
+import org.codehaus.jackson.annotate.JsonIgnore;
+
 @Entity
 @Table(name="comments")
 public class Comments extends BaseModel implements Serializable {
@@ -33,6 +35,9 @@ public class Comments extends BaseModel implements Serializable {
 	@Column(name="num_of_dislike", nullable= false)
 	private int numOfDislike;
 	
+	@ManyToOne(targetEntity=User.class)
+	private User user;
+	
 	@ManyToOne(targetEntity =Recommen_books.class)
 //	@JoinColumn(name = "book_id", referencedColumnName = "book_id", nullable = false,insertable=false, updatable=false)
 	private Recommen_books recommen_books;
@@ -40,17 +45,27 @@ public class Comments extends BaseModel implements Serializable {
 	@OneToMany(targetEntity = Son_comments.class, mappedBy = "comments")
 	private Set<Son_comments> son_comments=new HashSet<Son_comments>();
 	
+	@JsonIgnore
 	public Set<Son_comments> getSon_comments() {
 		return son_comments;
 	}
 	public void setSon_comments(Set<Son_comments> son_comments) {
 		this.son_comments = son_comments;
 	}
+	
+	@JsonIgnore
 	public Recommen_books getRecommen_books() {
 		return recommen_books;
 	}
 	public void setRecommen_books(Recommen_books recommen_books) {
 		this.recommen_books = recommen_books;
+	}
+	@JsonIgnore
+	public User getUser() {
+		return user;
+	}
+	public void setUser(User user) {
+		this.user = user;
 	}
 	public String getCommenterId() {
 		return commenterId;
@@ -81,12 +96,6 @@ public class Comments extends BaseModel implements Serializable {
 	}
 	public void setNumOfDislike(int numOfDislike) {
 		this.numOfDislike = numOfDislike;
-	}
-	@Override
-	public String toString() {
-		return "Comments [commenterId=" + commenterId + ", commentContent=" + commentContent + ", commentScore="
-				+ commentScore + ", numOfLike=" + numOfLike + ", numOfDislike=" + numOfDislike + ", getId()=" + getId()
-				+ ", getCreateDate()=" + getCreateDate() + "]";
 	}
 	
 }

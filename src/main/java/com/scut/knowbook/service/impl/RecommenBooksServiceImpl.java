@@ -1,7 +1,10 @@
 package com.scut.knowbook.service.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.scut.knowbook.dao.IRecommenBooksDao;
 import com.scut.knowbook.model.Recommen_books;
@@ -43,14 +46,28 @@ public class RecommenBooksServiceImpl implements IRecommenBooksService {
 		return this.recommenBooksDao.findByBookClass(bookClass);
 	}
 
+	@Transactional
 	public Recommen_books save(Recommen_books recommen_books) {
 		// TODO Auto-generated method stub
 		return this.recommenBooksDao.save(recommen_books);
 	}
 
+	@Transactional
 	public void delete(Recommen_books recommen_books) {
 		// TODO Auto-generated method stub
 		this.recommenBooksDao.delete(recommen_books);
 	}
+
+	@Transactional
+	public Iterable<Recommen_books> findAll() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public Page<Recommen_books> findAll(Pageable pageable) {
+		// TODO Auto-generated method stub
+		return this.recommenBooksDao.findAll(pageable);
+	}
+
 
 }

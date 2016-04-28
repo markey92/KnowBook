@@ -4,6 +4,7 @@ E:\javass\knowbook\src\main\java\com\scut\knowbook\service\impl\RecommenBooksSer
 E:\javass\knowbook\src\main\java\com\scut\knowbook\service\IRecommenBooksService.java
 E:\javass\knowbook\src\main\java\com\scut\knowbook\service\ISellerMarketService.java
 E:\javass\knowbook\src\main\java\com\scut\knowbook\service\IUserService.java
+E:\javass\knowbook\src\main\java\com\scut\knowbook\control\BookListControl.java
 E:\javass\knowbook\src\main\java\com\scut\knowbook\control\UserRecommentController.java
 E:\javass\knowbook\src\main\java\com\scut\knowbook\model\BaseModel.java
 E:\javass\knowbook\src\main\java\com\scut\knowbook\service\ICommentsService.java

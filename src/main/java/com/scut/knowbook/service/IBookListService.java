@@ -1,5 +1,8 @@
 package com.scut.knowbook.service;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
 import com.scut.knowbook.model.BookList;
 
 public interface IBookListService {
@@ -13,4 +16,6 @@ public interface IBookListService {
 	public void delete(BookList bookList);
 	
 	public Iterable<BookList> findAll();
+	
+	public Page<BookList> findAllBookList(Pageable pageable);
 }

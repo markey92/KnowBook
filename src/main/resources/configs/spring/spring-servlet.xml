@@ -16,8 +16,7 @@
 	                 	http://www.springframework.org/schema/mvc
 	                    http://www.springframework.org/schema/mvc/spring-mvc-4.0.xsd">               
 	
-   
-    <mvc:resources mapping="/resources/**" location="/static/" />
+       <mvc:resources mapping="/resources/**" location="/static/" />
     <!-- 配置页面成为静态资源，这个项目中所有页面都当成是一个静态资源，里面的动态数据都是在页面加载过程中通过js来从后台获取的 -->
     <mvc:resources mapping="/views/**" location="/static/views/" />
     <mvc:resources mapping="/js/**" location="/static/js/" />

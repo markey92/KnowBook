@@ -9,6 +9,7 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
@@ -43,7 +44,13 @@ public class User extends BaseModel implements Serializable {
 	private Set<Recommen_books> recommen_books=new HashSet<Recommen_books>();
 	
 	
-	@OneToMany(targetEntity=BookList.class,mappedBy = "user")
+	@OneToMany(targetEntity=Comments.class,mappedBy="user")
+	private Set<Comments> comments=new HashSet<Comments>();
+	
+	@OneToMany(targetEntity=Son_comments.class,mappedBy="user")
+	private Set<Son_comments> son_comments=new HashSet<Son_comments>();
+	
+	@ManyToMany(targetEntity=BookList.class,mappedBy = "users")
 	private Set<BookList> bookList=new HashSet<BookList>();
 	
 	@JsonIgnore
@@ -68,6 +75,21 @@ public class User extends BaseModel implements Serializable {
 	}
 	public void setRecommen_books(Set<Recommen_books> recommen_books) {
 		this.recommen_books = recommen_books;
+	}
+	@JsonIgnore
+	public Set<Comments> getComments() {
+		return comments;
+	}
+	public void setComments(Set<Comments> comments) {
+		this.comments = comments;
+	}
+	
+	@JsonIgnore
+	public Set<Son_comments> getSon_comments() {
+		return son_comments;
+	}
+	public void setSon_comments(Set<Son_comments> son_comments) {
+		this.son_comments = son_comments;
 	}
 	public String getPhoneNumber() {
 		return phoneNumber;
