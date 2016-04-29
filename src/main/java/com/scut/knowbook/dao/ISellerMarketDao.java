@@ -1,6 +1,9 @@
 package com.scut.knowbook.dao;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.repository.CrudRepository;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.scut.knowbook.model.Seller_market;
 
@@ -20,10 +23,15 @@ public interface ISellerMarketDao extends CrudRepository<Seller_market, Long> {
 	
 	public Seller_market findByBookAuthor(String bookAuthor);
 	
-	public Seller_market findByBookClass(String bookClass);
+	public Page<Seller_market> findByBookClass(String bookClass,Pageable pageable);
 	
-	public Seller_market findBySellingWay(String sellingWay);
+	public Page<Seller_market> findBySellingWay(String sellingWay,Pageable pageable);
 	
+	public Page<Seller_market> findBySellingWayAndBookClass(String sellingWay,String bookClass,Pageable pageable);
+	
+	@Transactional
 	@SuppressWarnings("unchecked")
 	public Seller_market save(Seller_market seller_market);
+	
+	public Page<Seller_market> findAll(Pageable pageable);
 }

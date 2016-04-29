@@ -76,8 +76,14 @@ public class WishControl {
 	 * 按类型查看所有心愿
 	 */
 	@RequestMapping(value="/fragmentWantSome",method=RequestMethod.POST, produces = "text/html;charset=utf-8")
-	public @ResponseBody Object fragmentWantSome(@RequestParam String type, HttpServletRequest request, HttpServletResponse response)throws JsonGenerationException, JsonMappingException, IOException{
+	public @ResponseBody Object fragmentWantSome(@RequestParam String pageNow, @RequestParam String pageSize, @RequestParam String type, HttpServletRequest request, HttpServletResponse response)throws JsonGenerationException, JsonMappingException, IOException{
 
+		if (pageNow == null || StringUtils.isEmpty(pageNow)) {
+			pageNow = "1";
+		}
+		if (pageSize == null || StringUtils.isEmpty(pageNow)) {
+			pageSize = "10";
+		}
 		JsonPacked jsonPacked=new JsonPacked();
 		//获取session中的phoneNumber
 		String phoneNumber = (String) request.getSession().getAttribute("phoneNumber");
@@ -92,7 +98,7 @@ public class WishControl {
 			jsonPacked.setResult("type,null");
 			return jsonPacked;
         }
-		Page wish_platform_page = wishPlatformService.findByBookClassPage(type, new PageRequest(0, 10));
+		Page wish_platform_page = wishPlatformService.findByBookClassPage(type, new PageRequest(Integer.parseInt(pageNow)-1, Integer.parseInt(pageSize)));
 		jsonPacked.setResult("success");
 		jsonPacked.getResultSet().add(wish_platform_page);
 		return jsonPacked;
@@ -100,9 +106,15 @@ public class WishControl {
 	/**
 	 * 查看所有心愿
 	 */
-	@RequestMapping(value="/fragmentWant",method=RequestMethod.GET, produces = "text/html;charset=utf-8")
-	public @ResponseBody Object fragmentWant(HttpServletRequest request, HttpServletResponse response)throws JsonGenerationException, JsonMappingException, IOException{
+	@RequestMapping(value="/fragmentWant",method=RequestMethod.POST, produces = "text/html;charset=utf-8")
+	public @ResponseBody Object fragmentWant(@RequestParam String pageNow, @RequestParam String pageSize, HttpServletRequest request, HttpServletResponse response)throws JsonGenerationException, JsonMappingException, IOException{
 
+		if (pageNow == null || StringUtils.isEmpty(pageNow)) {
+			pageNow = "1";
+		}
+		if (pageSize == null || StringUtils.isEmpty(pageNow)) {
+			pageSize = "10";
+		}
 		JsonPacked jsonPacked=new JsonPacked();
 		//获取session中的phoneNumber
 		String phoneNumber = (String) request.getSession().getAttribute("phoneNumber");
@@ -113,7 +125,7 @@ public class WishControl {
 			return jsonPacked;
 		}
 
-		Page wish_platform_page = wishPlatformService.findAllByPage(new PageRequest(0, 10));
+		Page wish_platform_page = wishPlatformService.findAllByPage(new PageRequest(Integer.parseInt(pageNow)-1, Integer.parseInt(pageSize)));
 		jsonPacked.setResult("success");
 		jsonPacked.getResultSet().add(wish_platform_page);
 		return jsonPacked;

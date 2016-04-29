@@ -1,13 +1,59 @@
 window.onload=function () {
 	console.log("测试开始");
 	login("13660208544");
-//	getBuyBook();
-//	getWantBook();
-//	myPicture();
+//	createSell();
+	getBuyBook();
+	getWantBook();
+	myPicture();
 //	createWish();
-//	fragmentWant();
-//	fragmentWantSome();
+	fragmentBuy();
+	fragmentBuySome();
+	fragmentWantSome();
 	detailWant(2);
+	detailBuy(2);
+}
+function detailBuy(id){
+	$.post("../sellerMarket/detailBuy",
+			{"BuyBookId":id},
+			function(data){
+		console.log(data);
+	})
+}
+function fragmentBuySome(){
+	$.post("../sellerMarket/fragmentBuySome",
+			{"Type":"",
+		     "sellType":"",
+		     "pageNow":"2",
+		     "pageSize":"1"},
+			function(data){
+		console.log(data);
+	})
+}
+function fragmentBuy(){
+	$.post("../sellerMarket/fragmentBuy",
+			{
+		     "pageNow":"1",
+	         "pageSize":"2"
+			},
+			function(data){
+		console.log(data);
+	})
+}
+function createSell () {
+	$.post("../sellerMarket/createBuy",
+        {"BuyBookName":"杉杉来吃",
+		 "BuyBookPicture":"e:/hellwooerlj.jpg",
+		 "BuyBookAuthor":"顾漫",
+		 "Type":"言情小说",
+		 "BuyBookDescript":"这是一本很好看的小说哦",
+		 "SellType":"零售",
+		 "price":"9.98",
+		 "newOrold":"旧"
+        },
+        function(data) {
+            console.log(data);
+            }
+        )
 }
 function detailWant(id){
 	$.post("../wish/detailWant",
@@ -18,13 +64,19 @@ function detailWant(id){
 }
 function fragmentWantSome(){
 	$.post("../wish/fragmentWantSome",
-			{"type":"小说"},
+			{"type":"小说",
+		     "pageNow":"1",
+		     "pageSize":"1"},
 			function(data){
 		console.log(data);
 	})
 }
 function fragmentWant(){
-	$.get("../wish/fragmentWant",
+	$.post("../wish/fragmentWant",
+			{
+		     "pageNow":"1",
+	         "pageSize":"1"
+			},
 			function(data){
 		console.log(data);
 	})

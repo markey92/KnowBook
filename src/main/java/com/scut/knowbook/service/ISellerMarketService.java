@@ -1,8 +1,10 @@
 package com.scut.knowbook.service;
 
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
 import com.scut.knowbook.model.Seller_market;
-import com.scut.knowbook.model.User;
 
 public interface ISellerMarketService{
 
@@ -20,11 +22,15 @@ public interface ISellerMarketService{
 	
 	public Seller_market findByBookAuthor(String bookAuthor);
 	
-	public Seller_market findByBookClass(String bookClass);
+	public Page<Seller_market> findByBookClass(String bookClass,Pageable pageable);
 	
-	public Seller_market findBySellingWay(String sellingWay);
+	public Page<Seller_market> findBySellingWay(String sellingWay,Pageable pageable);
+	
+	public Page<Seller_market> findBySellingWayAndBookClass(String sellingWay,String bookClass, Pageable pageable);
 	
 	public Seller_market save(Seller_market seller_market);
 	
 	public void delete(Seller_market seller_market);
+	
+	public Page<Seller_market> findAllByPage(Pageable pageable);
 }
