@@ -19,6 +19,8 @@ import javax.persistence.Table;
 
 import org.codehaus.jackson.annotate.JsonIgnore;
 
+import com.scut.knowbook.service.impl.UserServiceImpl;
+
 @Entity
 @Table(name="book_list")
 public class BookList extends BaseModel implements Serializable {
@@ -38,6 +40,9 @@ public class BookList extends BaseModel implements Serializable {
     public Set<Recommen_books> recommen_books=new HashSet<Recommen_books>();
     
     @ManyToMany
+    @JoinTable(name="book_list_user",
+	joinColumns=@JoinColumn(name="bookList_id",referencedColumnName="id"),
+	inverseJoinColumns=@JoinColumn(name="users_id",referencedColumnName="id",unique=false))
     private Set<User> users=new HashSet<User>();
 	
 	public String getBookListName() {

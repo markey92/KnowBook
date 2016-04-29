@@ -1,5 +1,8 @@
 package com.scut.knowbook.service;
 
+import java.sql.Timestamp;
+import java.util.List;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -18,4 +21,10 @@ public interface IBookListService {
 	public Iterable<BookList> findAll();
 	
 	public Page<BookList> findAllBookList(Pageable pageable);
+	
+	public List<BookList> findMostBookList();
+	
+	public List<BookList> findByCreateDateBetween(Timestamp max, Timestamp min);
+	
+	public List<BookList> findHotBookList(Timestamp max, Timestamp min);
 }

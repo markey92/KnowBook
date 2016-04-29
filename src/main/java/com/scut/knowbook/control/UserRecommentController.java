@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import javax.annotation.Resource;
+import javax.print.attribute.standard.RequestingUserName;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.log4j.Logger;
@@ -56,16 +57,14 @@ public class UserRecommentController {
 	 * 用于用户插入新的推荐书籍，包括bookName,bookpicture,bookAuthor,bookClass,bookSummary,recommenReason||phoneNUmber这些属性
 	 */
 	@RequestMapping(value="/createshowbook",method=RequestMethod.POST, produces = "text/html;charset=utf-8")
-	public @ResponseBody Object createshowbook(Recommen_books recommen_books,String phoneNumber)throws JsonGenerationException, JsonMappingException, IOException{
+	public @ResponseBody Object createshowbook(Recommen_books recommen_books,HttpServletRequest request)throws JsonGenerationException, JsonMappingException, IOException{
 		JsonPacked jsonPacked=new JsonPacked();
+		String phoneNumber=(String) request.getSession().getAttribute("phoneNumber");
 		User user=userService.findByPhoneNumber(phoneNumber);
 		if(user==null){
-			jsonPacked.setResult("user,null");
+			jsonPacked.setResult("null");
 			return jsonPacked;
 		}
-		recommen_books.setBookLocation("1");			//设置推荐书籍的地理位置
-		recommen_books.setRecommenerId(phoneNumber);
-		
 		recommen_books.setUser(user);
 		recommenBooksService.save(recommen_books);
 		jsonPacked.setResult("success");
@@ -76,11 +75,12 @@ public class UserRecommentController {
 	 * 推荐书籍展示,用于展示所有用户推荐书籍的数据，一次推送十条数据
 	 */
 	@RequestMapping(value="/fragmentshow", method = RequestMethod.GET,  produces = "text/html;charset=utf-8")
-	public @ResponseBody Object fragmentshow(String phoneNumber) throws JsonGenerationException, JsonMappingException, IOException{
+	public @ResponseBody Object fragmentshow(HttpServletRequest request,int page) throws JsonGenerationException, JsonMappingException, IOException{
+		String phoneNumber=(String) request.getSession().getAttribute("phoneNumber");
 		User user=userService.findByPhoneNumber(phoneNumber);
 		JsonPacked jsonPacked=new JsonPacked();
 		if(user!=null){
-			Page<Recommen_books> recommen_books=recommenBooksService.findAll(new PageRequest(0, 10));
+			Page<Recommen_books> recommen_books=recommenBooksService.findAll(new PageRequest(page, 10));
 			for(Recommen_books recommen_book:recommen_books){
 				jsonPacked.getResultSet().add(recommen_book);
 				int numOfComments=recommen_book.getComments().size();
@@ -92,7 +92,7 @@ public class UserRecommentController {
 			return jsonPacked;
 		}
 		else{
-			jsonPacked.setResult("user,null");
+			jsonPacked.setResult("null");
 			return jsonPacked;
 		}
 	}	
@@ -122,7 +122,7 @@ public class UserRecommentController {
 	 * 给出每页十条对应书籍id的评论
 	 */
 	@RequestMapping(value="/showbookComment", method = RequestMethod.GET,  produces = "text/html;charset=utf-8")
-	public @ResponseBody Object showbookComment(Long id) throws JsonGenerationException, JsonMappingException, IOException{
+	public @ResponseBody Object showbookComment(Long id,int page) throws JsonGenerationException, JsonMappingException, IOException{
 
 		JsonPacked jsonPacked=new JsonPacked();
 		Recommen_books recommen_books=recommenBooksService.findById(id);
@@ -131,7 +131,7 @@ public class UserRecommentController {
 			return jsonPacked;
 		}
 		jsonPacked.setResult("success");
-		Page<Comments> comments=commentsService.findBy(id,new PageRequest(0, 10));		//这里应该用分页调用，第一次取出两条评论，之后每页取出十条评论
+		Page<Comments> comments=commentsService.findBy(id,new PageRequest(page, 10));		//这里应该用分页调用，第一次取出两条评论，之后每页取出十条评论
 		if(comments!=null){
 			for(Comments comment:comments){
 				jsonPacked.getResultSet().add(comment);
@@ -181,6 +181,7 @@ public class UserRecommentController {
 		son_comments.setUser(user);
 		son_comments.setComments(comments);
 		sonCommentsService.save(son_comments);
+		jsonPacked.setResult("success");
 		return jsonPacked;
 	}	
 	/**
@@ -207,5 +208,27 @@ public class UserRecommentController {
 		jsonPacked.setResult("success");
 		return jsonPacked;
 	}
-		
+	/**
+	 * myshowBook查看自己推荐过的书籍	
+	 */
+	@RequestMapping(value="/myshowBook",method=RequestMethod.GET,produces="text/html;charset=utf-8")
+	public @ResponseBody Object myshowBook(HttpServletRequest request)throws JsonGenerationException,JsonMappingException,IOException{
+		JsonPacked jsonPacked=new JsonPacked();
+		String phoneNumber=(String) request.getSession().getAttribute("phoneNumber");
+		User user=userService.findByPhoneNumber(phoneNumber);
+		if(user==null){
+			jsonPacked.setResult("notlogin");
+			return jsonPacked;
+		}
+		Set<Recommen_books> recommen_books=user.getRecommen_books();
+		if(recommen_books==null||recommen_books.isEmpty()){
+			jsonPacked.setResult("null");
+			return jsonPacked;
+		}
+		for(Recommen_books recommen_book:recommen_books){
+			jsonPacked.getResultSet().add(recommen_book);
+		}
+		jsonPacked.setResult("success");
+		return jsonPacked;
+	}
 }
