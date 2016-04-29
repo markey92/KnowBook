@@ -8,11 +8,10 @@
 <html>
 <body>
 <h2>Hello World!</h2>
-<form action="<%=basePath %>showBook/writeshowbookSonComment" method="post">
+<form action="<%=basePath %>booklist/noCollectBooklist" method="get">
+<% session.setAttribute("phoneNumber", "18814122522"); %>
 <!-- <input type="text" name="phoneNumber" />  -->
-id<input type="text" name="id" /><br/>
-commenterId<input type="text" name="commenterId" /><br/>
-commentContent<input type="text" name="commentContent" /><br/>
+id<input type="text" name="booklistId" /><br/>
 <input type="submit" value="submit">
 </form>
 </body>
