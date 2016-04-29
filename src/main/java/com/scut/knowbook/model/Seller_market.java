@@ -18,29 +18,48 @@ public class Seller_market extends BaseModel implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
+	//BuyBookName
 	@Column(name="book_name", nullable= false)
 	private String bookName;
-	
+	//price
 	@Column(name="book_price", nullable= false)
-	private int bookPrice;
-	
-	@Column(name="bookOwner_id", nullable= false)
+	private double bookPrice;
+	//null
+	@Column(name="bookOwner_id", nullable= true)
 	private String bookOwnerId;
-	
+	//newOrold
 	@Column(name="book_situation", nullable= false)
 	private String bookSituation;
-	
+	//type
 	@Column(name="book_class", nullable= false)
 	private String bookClass;
-	
-	@Column(name="owner_online_time", nullable= false)
+	//null
+	@Column(name="owner_online_time", nullable= true)
 	private String ownerOnlineTime;
-	
+	//BuyBookAuthor
 	@Column(name="book_author", nullable= false)
 	private String bookAuthor;
-	
+	//SellType
 	@Column(name="selling_way", nullable= false)
 	private String sellingWay;
+	public String getBookPicture() {
+		return bookPicture;
+	}
+	public void setBookPicture(String bookPicture) {
+		this.bookPicture = bookPicture;
+	}
+	public String getBookDescript() {
+		return bookDescript;
+	}
+	public void setBookDescript(String bookDescript) {
+		this.bookDescript = bookDescript;
+	}
+	//BuyBookPicture
+	@Column(name="book_picture", nullable= true)
+	private String bookPicture;
+	//BuyBookDescript
+	@Column(name="book_descript", nullable= false)
+	private String bookDescript;
 	
 	@ManyToOne(targetEntity =User_info.class)
 //	@JoinColumn(name = "bookOwner_id", referencedColumnName = "PhoneNumber", nullable = false,insertable=false, updatable=false)
@@ -58,10 +77,11 @@ public class Seller_market extends BaseModel implements Serializable {
 	public void setBookName(String bookName) {
 		this.bookName = bookName;
 	}
-	public int getBookPrice() {
+
+	public double getBookPrice() {
 		return bookPrice;
 	}
-	public void setBookPrice(int bookPrice) {
+	public void setBookPrice(double bookPrice) {
 		this.bookPrice = bookPrice;
 	}
 	public String getBookOwnerId() {

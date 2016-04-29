@@ -1,6 +1,8 @@
 package com.scut.knowbook.service.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.scut.knowbook.dao.ISellerMarketDao;
@@ -10,7 +12,7 @@ import com.scut.knowbook.service.ISellerMarketService;
 @Service("sellerMarketService")
 public class SellerMarketServiceImpl implements ISellerMarketService {
 
-//	@Autowired
+	@Autowired
 	private ISellerMarketDao sellerMarketDao;
 
 	public Seller_market findById(Long id) {
@@ -48,15 +50,6 @@ public class SellerMarketServiceImpl implements ISellerMarketService {
 		return this.sellerMarketDao.findByBookAuthor(bookAuthor);
 	}
 
-	public Seller_market findByBookClass(String bookClass) {
-		// TODO Auto-generated method stub
-		return this.sellerMarketDao.findByBookClass(bookClass);
-	}
-
-	public Seller_market findBySellingWay(String sellingWay) {
-		// TODO Auto-generated method stub
-		return this.sellerMarketDao.findBySellingWay(sellingWay);
-	}
 
 	public Seller_market save(Seller_market seller_market) {
 		// TODO Auto-generated method stub
@@ -66,6 +59,29 @@ public class SellerMarketServiceImpl implements ISellerMarketService {
 	public void delete(Seller_market seller_market) {
 		// TODO Auto-generated method stub
 		this.sellerMarketDao.delete(seller_market);
+	}
+
+	public Page<Seller_market> findAllByPage(Pageable pageable) {
+		// TODO Auto-generated method stub
+		return sellerMarketDao.findAll(pageable);
+	}
+
+	public Page<Seller_market> findByBookClass(String bookClass,
+			Pageable pageable) {
+		// TODO Auto-generated method stub
+		return sellerMarketDao.findByBookClass(bookClass, pageable);
+	}
+
+	public Page<Seller_market> findBySellingWay(String sellingWay,
+			Pageable pageable) {
+		// TODO Auto-generated method stub
+		return sellerMarketDao.findBySellingWay(sellingWay, pageable);
+	}
+
+	public Page<Seller_market> findBySellingWayAndBookClass(String sellingWay,
+			String bookClass, Pageable pageable) {
+		// TODO Auto-generated method stub
+		return sellerMarketDao.findBySellingWayAndBookClass(sellingWay, bookClass, pageable);
 	}
 
 }
