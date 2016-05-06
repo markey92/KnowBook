@@ -159,6 +159,12 @@ public class TestLoginFunction {
 			System.out.println(booklist.getBookListName());
 		}
 	}
+	
+	@Test
+	public void uploadFile(){
+		BookList bookList=bookListService.findById(1l);
+		System.out.println(bookList.getBooklistPicture());
+	}
 }
 	
 

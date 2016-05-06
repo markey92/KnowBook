@@ -22,12 +22,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.scut.knowbook.model.Seller_market;
 import com.scut.knowbook.model.User;
 import com.scut.knowbook.model.User_info;
 import com.scut.knowbook.model.Wish_platform;
 import com.scut.knowbook.model.OP.JsonPacked;
+import com.scut.knowbook.service.IFileUpLoadService;
 import com.scut.knowbook.service.IUserInfoService;
 import com.scut.knowbook.service.IUserService;
 import com.scut.knowbook.service.IWishPlatformService;
@@ -46,6 +48,9 @@ public class WishControl {
 	
 	@Resource(name="wishPlatformService")
 	private IWishPlatformService wishPlatformService;
+	
+	@Resource(name="fileUpLoadService")
+	private IFileUpLoadService fileUpLoadService;
 
 	/**
 	 * 按id查找某本确定的书
@@ -164,9 +169,9 @@ public class WishControl {
 	 */
 	@SuppressWarnings("unused")
 	@RequestMapping(value="/createWant", method=RequestMethod.POST, produces = "text/html;charset=utf-8")
-	public @ResponseBody JsonPacked createWant(@RequestParam String WantBookName,@RequestParam String WantBookPicture,
+	public @ResponseBody JsonPacked createWant(@RequestParam String WantBookName,@RequestParam("WantBookPicture") MultipartFile WantBookPicture,
 			@RequestParam String WantBookAuthor, @RequestParam String WantBookPay,@RequestParam String WantBookType,
-			@RequestParam String WantBookContent,@RequestParam String WishPostiton, HttpServletRequest request, HttpServletResponse response){
+			@RequestParam String WantBookContent,@RequestParam String WishPostiton, HttpServletRequest request, HttpServletResponse response) throws Exception{
 		JsonPacked jsonPacked=new JsonPacked();
 		//获取session中的phoneNumber
 		String phoneNumber = (String) request.getSession().getAttribute("phoneNumber");
@@ -184,8 +189,10 @@ public class WishControl {
 			return jsonPacked;
 		}
 		//书籍图片肯定不是这样的，后面再改
-		if (WantBookPicture == null || StringUtils.isEmpty(WantBookPicture)) {
-			logger.info("书籍图片不能为空");
+		logger.info("用户"+phoneNumber+"上传了"+WantBookPicture.getOriginalFilename()+"并试图创建心愿");
+		String url=fileUpLoadService.FileUpload(WantBookPicture, new Date()+phoneNumber+".jpg"); 
+		if(url==null||url.equals("")||url.isEmpty()){
+			logger.info("url为空");
 			jsonPacked.setResult("WantBookPicture,null");
 			return jsonPacked;
 		}
@@ -241,6 +248,7 @@ public class WishControl {
 			return jsonPacked;
 		}
 		Wish_platform wish_platform = new Wish_platform();
+		wish_platform.setWantBookPicture(url);
 		wish_platform.setBookAuthor(WantBookAuthor);
 		wish_platform.setBookClass(WantBookType);
 		wish_platform.setBookName(WantBookName);

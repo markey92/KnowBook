@@ -1,6 +1,8 @@
 package com.scut.knowbook.service.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,6 +31,11 @@ public class SonCommentsServiceImpl implements ISonCommentsService {
 	public void delete(Son_comments son_comments) {
 		// TODO Auto-generated method stub
 		this.sonCommentsDao.delete(son_comments);
+	}
+
+	public Page<Son_comments> findByCommentsId(Long commentsId, Pageable pageable) {
+		// TODO Auto-generated method stub
+		return this.sonCommentsDao.findByCommentsId(commentsId, pageable);
 	}
 
 }

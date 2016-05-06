@@ -1,16 +1,18 @@
 package com.scut.knowbook.control;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
-import java.util.Set;
+import java.util.List;
+import java.util.Map;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.catalina.connector.Request;
-import org.apache.commons.httpclient.HttpsURL;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.codehaus.jackson.JsonGenerationException;
@@ -20,10 +22,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.ModelAndView;
 
 import com.scut.knowbook.model.User;
 import com.scut.knowbook.model.User_info;
 import com.scut.knowbook.model.OP.JsonPacked;
+import com.scut.knowbook.service.IFileUpLoadService;
 import com.scut.knowbook.service.IUserInfoService;
 import com.scut.knowbook.service.IUserService;
 
@@ -43,6 +48,8 @@ public class LoginController {
 	@Resource(name="userInfoService")
 	private IUserInfoService userInfoService;
 	
+	@Resource(name="fileUpLoadService")
+	private IFileUpLoadService fileUpLoadService;
 	/**
 	 * 用户登录验证
 	 */
@@ -56,30 +63,44 @@ public class LoginController {
 		}else if (!password.equals(user.getPassword())) {
 			jsonPacked.setResult("password,error");
 		}else{
-			jsonPacked.setResult("login,success");
+			jsonPacked.setResult("success");
 			request.getSession().setAttribute("phoneNumber", phoneNumber);
 		}
-		logger.info("user:" + phoneNumber + " password:" + password);
+		logger.info("user:" + phoneNumber + " password:" + password+"用户登录成功");
+		logger.info("登录ip为："+request.getRemoteAddr());
 		return jsonPacked;
 	}
 	/**
 	 * 用户注册验证
 	 */
-	@RequestMapping(value="/registe", method = RequestMethod.POST,  produces = "text/html;charset=utf-8")
-	public @ResponseBody Object registe(@RequestParam ("phoneNumber") String phoneNumber, @RequestParam ("password") String password) throws JsonGenerationException, JsonMappingException, IOException{
+	@RequestMapping(value="/registe", method = RequestMethod.POST)
+	public @ResponseBody Object registe(String phoneNumber, String password,HttpServletRequest request) throws JsonGenerationException, JsonMappingException, IOException{
 		
+		logger.info("注册ip为："+request.getRemoteAddr());
 		JsonPacked jsonPacked=new JsonPacked();
 		User user=new User();
+		if(phoneNumber==null||password==null){
+			logger.info("null");
+			logger.info(request.getRemoteAddr());
+			jsonPacked.setResult("null");
+			return jsonPacked;
+		}
+		if(userService.findByPhoneNumber(phoneNumber)!=null){
+			logger.info("该号码已被注册过");
+			jsonPacked.setResult("error");
+			return jsonPacked;
+		}
 		user.setPhoneNumber(phoneNumber);
 		user.setPassword(password);
 		
 		User_info user_info=new User_info();
-		user.setUser_info(user_info);
+		user_info.setUser(user);
 		userInfoService.save(user_info);
 		userService.save(user);
 		
 		logger.info("user:" + phoneNumber + " password:" + password);
-		jsonPacked.setResult("registe,success");
+		jsonPacked.setResult("success");
+		logger.info("用户注册成功");
 		return jsonPacked;
 	}
 	
@@ -91,15 +112,22 @@ public class LoginController {
 		
 		JsonPacked jsonPacked=new JsonPacked();
 		String phoneNumber=(String)request.getSession().getAttribute("phoneNumber");
+		logger.info("用户："+phoneNumber);
 		if(phoneNumber==null){
 			jsonPacked.setResult("notLogin");
+			return jsonPacked;
+		}
+		if(sex.length()>1){
+			logger.info("性别长度超过1");
+			jsonPacked.setResult("error");
 			return jsonPacked;
 		}
 		User user=userService.findByPhoneNumber(phoneNumber);
 		user.setSex(sex);
 		user.setUserName(userName);
 		userService.save(user);
-		jsonPacked.setResult("loginAdd,success");
+		jsonPacked.setResult("success");
+		logger.info("用户添加数据成功");
 		return jsonPacked;
 	}
 	/**
@@ -116,10 +144,12 @@ public class LoginController {
 		}
 		user.setPassword(password);
 		userService.save(user);
-		jsonPacked.setResult("relogin,success");
+		jsonPacked.setResult("success");
 		return jsonPacked;
 	}
-	
+	/**
+	 * 返回user_info信息
+	 */
 	@RequestMapping(value="/getinfo", method = RequestMethod.GET,  produces = "text/html;charset=utf-8")
 	public @ResponseBody Object getInfo(HttpServletRequest request) throws JsonGenerationException, JsonMappingException, IOException{
 		
@@ -173,6 +203,25 @@ public class LoginController {
 		}
 		jsonPacked.setResult("success");
 		jsonPacked.getResultSet().add(phoneNumber);
+		return jsonPacked;
+	}
+	/**
+	 * 图片上传测试接口，用来测试安卓端与后台能否成功连接，后期可删除
+	 * @throws Exception 
+	 */
+	@RequestMapping(value="/doUpload", method=RequestMethod.POST, produces = "text/html;charset=utf-8")
+	public @ResponseBody Object doUploadFile(@RequestParam("file") MultipartFile file,HttpServletRequest request) throws Exception{
+		logger.info(request.getRemoteAddr()+"上传了文件:"+file.getOriginalFilename());
+		JsonPacked jsonPacked=new JsonPacked();
+		String phoneNumber=(String) request.getSession().getAttribute("phoneNumber");
+		String url=fileUpLoadService.FileUpload(file,new Date()+phoneNumber+".jpg"); 
+//		String url="/images/"+phoneNumber+file.getOriginalFilename();
+		if(url.isEmpty()||url==null||url.equals("")){
+			jsonPacked.setResult("null");
+			return jsonPacked;
+		}
+		jsonPacked.setResult("successs");
+		jsonPacked.getResultSet().add(url);
 		return jsonPacked;
 	}
 }

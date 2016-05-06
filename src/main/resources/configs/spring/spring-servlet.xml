@@ -20,6 +20,7 @@
     <!-- 配置页面成为静态资源，这个项目中所有页面都当成是一个静态资源，里面的动态数据都是在页面加载过程中通过js来从后台获取的 -->
     <mvc:resources mapping="/views/**" location="/static/views/" />
     <mvc:resources mapping="/js/**" location="/static/js/" />
+     <mvc:resources mapping="/images/**" location="/static/images/" />
     <mvc:annotation-driven>  
         <mvc:message-converters>  
             <ref bean="stringHttpMessageConverter" />  
@@ -27,6 +28,14 @@
         </mvc:message-converters>  
     </mvc:annotation-driven>  
   
+  	<!--200*1024*1024即200M resolveLazily属性启用是为了推迟文件解析，以便捕获文件大小异常 -->
+	<bean id="multipartResolver"
+		class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+		<property name="maxUploadSize" value="209715200" />
+		<property name="defaultEncoding" value="UTF-8" />
+		<property name="resolveLazily" value="true" />
+	</bean>
+	
     <bean id="stringHttpMessageConverter"  
         class="org.springframework.http.converter.StringHttpMessageConverter">  
         <constructor-arg value="UTF-8" index="0"></constructor-arg><!--  

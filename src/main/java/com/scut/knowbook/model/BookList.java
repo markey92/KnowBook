@@ -36,6 +36,9 @@ public class BookList extends BaseModel implements Serializable {
 	@Column(name="booklist_name", nullable= false)
 	private String bookListName;
 	
+	@Column(name="booklist_picture",nullable=true)
+	private String booklistPicture;
+	
 	@ManyToMany(targetEntity=Recommen_books.class,cascade = {CascadeType.PERSIST, CascadeType.MERGE}, mappedBy = "bookList", fetch = FetchType.LAZY)
     public Set<Recommen_books> recommen_books=new HashSet<Recommen_books>();
     
@@ -45,6 +48,12 @@ public class BookList extends BaseModel implements Serializable {
 	inverseJoinColumns=@JoinColumn(name="users_id",referencedColumnName="id",unique=false))
     private Set<User> users=new HashSet<User>();
 	
+	public String getBooklistPicture() {
+		return booklistPicture;
+	}
+	public void setBooklistPicture(String booklistPicture) {
+		this.booklistPicture = booklistPicture;
+	}
 	public String getBookListName() {
 		return bookListName;
 	}

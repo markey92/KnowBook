@@ -41,6 +41,9 @@ public class Wish_platform extends BaseModel implements Serializable {
 	@Column(name="wish_pay", nullable= false)
 	private String wishPay="我唱歌给你听呀！么么哒";
 	
+	@Column(name="wantBookPicture",nullable=true)
+	private String wantBookPicture;
+	
 	@ManyToOne(targetEntity =User_info.class)
 	private User_info user_info=new User_info();
 	
@@ -56,8 +59,12 @@ public class Wish_platform extends BaseModel implements Serializable {
 	public void setWishLocation(String wishLocation) {
 		this.wishLocation = wishLocation;
 	}
-
-	
+	public String getWantBookPicture() {
+		return wantBookPicture;
+	}
+	public void setWantBookPicture(String wantBookPicture) {
+		this.wantBookPicture = wantBookPicture;
+	}
 	@JsonIgnore
 	public User_info getUser_info() {
 		return user_info;

@@ -25,6 +25,6 @@ public interface ICommentsDao extends CrudRepository<Comments, Long>,PagingAndSo
 	@SuppressWarnings("unchecked")
 	public Comments save(Comments comments);
 	
-	@Query("select a from Comments a where a.recommen_books.id = ?1")
+	@Query("select a from Comments a where a.recommen_books.id = ?1 Order by a.createDate desc")
 	public Page<Comments> findByRecommen_books_id(Long recommen_books_id,Pageable pageable);
 }

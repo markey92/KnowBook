@@ -2,8 +2,12 @@ package com.scut.knowbook.control;
 
 import java.io.IOException;
 import java.sql.Timestamp;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 
 import javax.annotation.Resource;
@@ -17,13 +21,16 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.scut.knowbook.model.BookList;
 import com.scut.knowbook.model.Recommen_books;
 import com.scut.knowbook.model.User;
 import com.scut.knowbook.model.OP.JsonPacked;
 import com.scut.knowbook.service.IBookListService;
+import com.scut.knowbook.service.IFileUpLoadService;
 import com.scut.knowbook.service.IRecommenBooksService;
 import com.scut.knowbook.service.IUserService;
 
@@ -39,6 +46,8 @@ public class BookListControl {
 	private IRecommenBooksService recommenBooksService;
 	@Resource(name="bookListService")
 	private IBookListService bookListService;
+	@Resource(name="fileUpLoadService")
+	private IFileUpLoadService fileUpLoadService;
 	/**
 	 * addTobookList收藏书籍到用户书单
 	 */
@@ -64,9 +73,10 @@ public class BookListControl {
 	}
 	/**
 	 * createbooklist用于创建用户书单
+	 * @throws Exception 
 	 */
 	@RequestMapping(value="/createbooklist", method = RequestMethod.POST,  produces = "text/html;charset=utf-8")
-	public @ResponseBody Object createbooklist(String bookListName,HttpServletRequest request, HttpServletResponse response) throws JsonGenerationException, JsonMappingException, IOException{
+	public @ResponseBody Object createbooklist(@RequestParam("file") MultipartFile file,String bookListName,HttpServletRequest request, HttpServletResponse response) throws Exception{
 		
 		JsonPacked jsonPacked=new JsonPacked();
 		String phoneNumber=(String)request.getSession().getAttribute("phoneNumber");		//得到session里面的phoneNumber属性
@@ -75,7 +85,15 @@ public class BookListControl {
 			jsonPacked.setResult("notlogin");
 			return jsonPacked;
 		}
+		logger.info(phoneNumber+"上传了文件"+file.getOriginalFilename()+"并创建了书单");
+		String url=fileUpLoadService.FileUpload(file, new Date()+phoneNumber+".jpg"); 
+		if(url==null||url.equals("")||url.isEmpty()){
+			logger.info("file为空");
+			jsonPacked.setResult("null");
+			return jsonPacked;
+		}
 		BookList bookList=new BookList();
+		bookList.setBooklistPicture(url);
 		bookList.setCreaterId(phoneNumber);
 		bookList.setBookListName(bookListName);
 		bookList.getUsers().add(user);
@@ -87,12 +105,32 @@ public class BookListControl {
 	 * fragmentbooklistWeek用于展示全部的书单
 	 */
 	@RequestMapping(value="/fragmentbooklistAll", method = RequestMethod.GET,  produces = "text/html;charset=utf-8")
-	public @ResponseBody Object fragmentbooklistAll() throws JsonGenerationException, JsonMappingException, IOException{
+	public @ResponseBody Object fragmentbooklistAll(int page,HttpServletRequest request) throws JsonGenerationException, JsonMappingException, IOException{
 		
+		logger.info("请求页码为："+page);
+		String phoneNumber=(String) request.getSession().getAttribute("phoneNumber");
 		JsonPacked jsonPacked=new JsonPacked();
-		Page<BookList> booklists=bookListService.findAllBookList(new PageRequest(0, 10));
+		Page<BookList> booklists=bookListService.findAllBookList(new PageRequest(page, 10));
+		int peopleCount,bookCount;
 		for(BookList booklist:booklists){
 			jsonPacked.getResultSet().add(booklist);
+			
+			peopleCount=booklist.getUsers().size();
+			bookCount=booklist.getRecommen_books().size();
+			Map<String, Integer> map=new ConcurrentHashMap<String, Integer>();
+			for(User user:booklist.getUsers()){
+				if(user.getPhoneNumber().equals(phoneNumber)){
+					map.put("isCollect", 1);
+					break;
+				}
+			}
+			if(map.get("isCollect")==null){
+				map.put("isCollect", 0);
+			}
+			map.put("peopleCount", peopleCount);
+			map.put("bookCount", bookCount);
+			
+			jsonPacked.getResultSet().add(map);
 		}
 		jsonPacked.setResult("success");
 		return jsonPacked;
@@ -101,12 +139,32 @@ public class BookListControl {
 	 * fragmentbooklistWorth展示收藏最多的书单
 	 */
 	@RequestMapping(value="/fragmentbooklistWorth", method = RequestMethod.GET,  produces = "text/html;charset=utf-8")
-	public @ResponseBody Object fragmentbooklistWorth() throws JsonGenerationException, JsonMappingException, IOException{
+	public @ResponseBody Object fragmentbooklistWorth(int page,HttpServletRequest request) throws JsonGenerationException, JsonMappingException, IOException{
 		
+		logger.info("请求页码为"+page);
+		String phoneNumber=(String) request.getSession().getAttribute("phoneNumber");
 		JsonPacked jsonPacked=new JsonPacked();
 		List<BookList> booklists=bookListService.findMostBookList();
+		int peopleCount,bookCount;
 		for(BookList booklist:booklists){
-			logger.info(booklist.getBookListName()+" "+booklist.getUsers().size());
+			jsonPacked.getResultSet().add(booklist);
+			
+			peopleCount=booklist.getUsers().size();
+			bookCount=booklist.getRecommen_books().size();
+			Map<String, Integer> map=new ConcurrentHashMap<String, Integer>();
+			for(User user:booklist.getUsers()){
+				if(user.getPhoneNumber().equals(phoneNumber)){
+					map.put("isCollect", 1);
+					break;
+				}
+			}
+			if(map.get("isCollect")==null){
+				map.put("isCollect", 0);
+			}
+			map.put("peopleCount", peopleCount);
+			map.put("bookCount", bookCount);
+			
+			jsonPacked.getResultSet().add(map);
 		}
 		jsonPacked.setResult("success");
 		for(BookList booklist:booklists){
@@ -118,34 +176,74 @@ public class BookListControl {
 	 * fragmentbooklistNew用于展示本周的书单
 	 */
 	@RequestMapping(value="/fragmentbooklistNew", method = RequestMethod.GET,  produces = "text/html;charset=utf-8")
-	public @ResponseBody Object fragmentbooklistNew() throws JsonGenerationException, JsonMappingException, IOException{
+	public @ResponseBody Object fragmentbooklistNew(int page,HttpServletRequest request) throws JsonGenerationException, JsonMappingException, IOException{
 		
+		logger.info("请求页码为"+page);
+		String phoneNumber=(String) request.getSession().getAttribute("phoneNumber");
 		JsonPacked jsonPacked=new JsonPacked();
 		List<BookList> booklists=bookListService.findByCreateDateBetween(new Timestamp(System.currentTimeMillis()-604800000), new Timestamp(System.currentTimeMillis()));
 		for(BookList booklist:booklists){
 			logger.info(booklist.getBookListName()+" "+booklist.getUsers().size());
 		}
-		jsonPacked.setResult("success");
+		int peopleCount,bookCount;
 		for(BookList booklist:booklists){
 			jsonPacked.getResultSet().add(booklist);
+			
+			peopleCount=booklist.getUsers().size();
+			bookCount=booklist.getRecommen_books().size();
+			Map<String, Integer> map=new ConcurrentHashMap<String, Integer>();
+			for(User user:booklist.getUsers()){
+				if(user.getPhoneNumber().equals(phoneNumber)){
+					map.put("isCollect", 1);
+					break;
+				}
+			}
+			if(map.get("isCollect")==null){
+				map.put("isCollect", 0);
+			}
+			map.put("peopleCount", peopleCount);
+			map.put("bookCount", bookCount);
+			
+			jsonPacked.getResultSet().add(map);
 		}
+		jsonPacked.setResult("success");
 		return jsonPacked;
 	}
 	/**
 	 * fragmentbooklistHot用于展示本周最热的书单
 	 */
 	@RequestMapping(value="/fragmentbooklistHot", method = RequestMethod.GET,  produces = "text/html;charset=utf-8")
-	public @ResponseBody Object fragmentbooklistHot() throws JsonGenerationException, JsonMappingException, IOException{
+	public @ResponseBody Object fragmentbooklistHot(int page,HttpServletRequest request) throws JsonGenerationException, JsonMappingException, IOException{
 		
+		logger.info("请求页码为"+page);
+		String phoneNumber=(String) request.getSession().getAttribute("phoneNumber");
 		JsonPacked jsonPacked=new JsonPacked();
 		List<BookList> booklists=bookListService.findHotBookList(new Timestamp(System.currentTimeMillis()-604800000), new Timestamp(System.currentTimeMillis()));
 		for(BookList booklist:booklists){
 			logger.info(booklist.getBookListName()+" "+booklist.getUsers().size());
 		}
-		jsonPacked.setResult("success");
+		int peopleCount,bookCount;
 		for(BookList booklist:booklists){
 			jsonPacked.getResultSet().add(booklist);
+			
+			peopleCount=booklist.getUsers().size();
+			bookCount=booklist.getRecommen_books().size();
+			Map<String, Integer> map=new ConcurrentHashMap<String, Integer>();
+			for(User user:booklist.getUsers()){
+				if(user.getPhoneNumber().equals(phoneNumber)){
+					map.put("isCollect", 1);
+					break;
+				}
+			}
+			if(map.get("isCollect")==null){
+				map.put("isCollect", 0);
+			}
+			map.put("peopleCount", peopleCount);
+			map.put("bookCount", bookCount);
+			
+			jsonPacked.getResultSet().add(map);
 		}
+		jsonPacked.setResult("success");
 		return jsonPacked;
 	}
 	/**
@@ -238,5 +336,27 @@ public class BookListControl {
 		jsonPacked.setResult("success");
 		return jsonPacked;
 	}
-	
+	/**
+	 * detailmyCreateBooklist查看书单详情
+	 */
+	@RequestMapping(value="/detailmyCreateBooklist", method = RequestMethod.GET,  produces = "text/html;charset=utf-8")
+	public @ResponseBody Object detailmyCreateBooklist(Long booklistId,HttpServletRequest request) throws JsonGenerationException, JsonMappingException, IOException{
+		
+		logger.info("请求的booklistId为："+booklistId);
+		JsonPacked jsonPacked=new JsonPacked();
+		String phoneNumber=(String)request.getSession().getAttribute("phoneNumber");		//得到session里面的phoneNumber属性
+		User user=userService.findByPhoneNumber(phoneNumber);
+		if(user==null){
+			jsonPacked.setResult("notlogin");
+			return jsonPacked;
+		}
+		BookList bookList=bookListService.findById(booklistId);
+		if(bookList==null){
+			jsonPacked.setResult("id,null");
+			return jsonPacked;
+		}
+		jsonPacked.setResult("success");
+		jsonPacked.getResultSet().add(bookList);
+		return jsonPacked;
+	}
 }

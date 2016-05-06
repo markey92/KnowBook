@@ -20,14 +20,14 @@ public class Comments extends BaseModel implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 	
-	@Column(name="commenter_id", nullable= false)
+	@Column(name="commenter_id", nullable= true)
 	private String commenterId;
 	
 	@Column(name="comment_content", nullable= false)
 	private String commentContent;
 	
 	@Column(name="comment_score", nullable= false)
-	private String commentScore;
+	private double commentScore;
 	
 	@Column(name="num_of_like", nullable= false)
 	private int numOfLike;
@@ -67,6 +67,7 @@ public class Comments extends BaseModel implements Serializable {
 	public void setUser(User user) {
 		this.user = user;
 	}
+	@JsonIgnore
 	public String getCommenterId() {
 		return commenterId;
 	}
@@ -79,10 +80,11 @@ public class Comments extends BaseModel implements Serializable {
 	public void setCommentContent(String commentContent) {
 		this.commentContent = commentContent;
 	}
-	public String getCommentScore() {
+	
+	public double getCommentScore() {
 		return commentScore;
 	}
-	public void setCommentScore(String commentScore) {
+	public void setCommentScore(double commentScore) {
 		this.commentScore = commentScore;
 	}
 	public int getNumOfLike() {

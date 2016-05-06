@@ -2,7 +2,10 @@ package com.scut.knowbook.control;
 
 import java.io.IOException;
 import java.sql.Timestamp;
+import java.util.Date;
+import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
@@ -20,12 +23,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.scut.knowbook.model.Seller_market;
 import com.scut.knowbook.model.User;
 import com.scut.knowbook.model.User_info;
 import com.scut.knowbook.model.Wish_platform;
 import com.scut.knowbook.model.OP.JsonPacked;
+import com.scut.knowbook.service.IFileUpLoadService;
 import com.scut.knowbook.service.ISellerMarketService;
 import com.scut.knowbook.service.IUserInfoService;
 import com.scut.knowbook.service.IUserService;
@@ -45,6 +50,9 @@ public class SellControl {
 	@Resource(name="sellerMarketService")
 	private ISellerMarketService sellerMarketService;
 	
+	@Resource(name="fileUpLoadService")
+	private IFileUpLoadService fileUpLoadService;
+	
 	/**
 	 * 按id查找某本确定的书
 	 */
@@ -57,30 +65,41 @@ public class SellControl {
 		//检查参数phone_number是否为空
 		if (phoneNumber == null || StringUtils.isEmpty(phoneNumber)) {
 			logger.info("phone_number不存在");
-			jsonPacked.setResult("user,unlogined");
+			jsonPacked.setResult("notlogin");
 			return jsonPacked;
 		}
         if(BuyBookId <= 0){
 			logger.info("WantBookId不存在");
-			jsonPacked.setResult("WantBookId,<=0");
+			jsonPacked.setResult("id,null");
 			return jsonPacked;
         }
 	    Seller_market seller_market = sellerMarketService.findById(BuyBookId);
-		jsonPacked.setResult("success");
-		jsonPacked.getResultSet().add(seller_market);
-		return jsonPacked;
+	    User_info user_info=seller_market.getUser_info();
+	    
+	    Map<String, Object> map=new ConcurrentHashMap<String, Object>();
+	    map.put("bookClass", seller_market.getBookClass());
+	    map.put("sellingWay", seller_market.getSellingWay());
+	    map.put("phoneNumber", phoneNumber);
+	    map.put("qq", user_info.getQq());
+	    map.put("weixin", user_info.getWeixin());
+	    map.put("bookDescript", seller_market.getBookDescript());
+	    return map;
+	    
+//		jsonPacked.setResult("success");
+//		jsonPacked.getResultSet().add(seller_market);
+//		return jsonPacked;
 	}
 	/**
 	 * 按类型和售卖方法查看所有心愿
 	 */
 	@RequestMapping(value="/fragmentBuySome",method=RequestMethod.POST, produces = "text/html;charset=utf-8")
-	public @ResponseBody Object fragmentBuySome(@RequestParam String sellType, @RequestParam String Type, @RequestParam String pageNow, @RequestParam String pageSize, HttpServletRequest request, HttpServletResponse response)throws JsonGenerationException, JsonMappingException, IOException{
+	public @ResponseBody Object fragmentBuySome(@RequestParam String sellType, @RequestParam String Type, @RequestParam Integer pageNow, @RequestParam Integer pageSize, HttpServletRequest request, HttpServletResponse response)throws JsonGenerationException, JsonMappingException, IOException{
 
-		if (pageNow == null || StringUtils.isEmpty(pageNow)) {
-			pageNow = "1";
+		if (pageNow == null ) {
+			pageNow = 0;
 		}
-		if (pageSize == null || StringUtils.isEmpty(pageNow)) {
-			pageSize = "10";
+		if (pageSize == null ) {
+			pageSize = 10;
 		}
 		JsonPacked jsonPacked=new JsonPacked();
 		//获取session中的phoneNumber
@@ -88,30 +107,30 @@ public class SellControl {
 		//检查参数phone_number是否为空
 		if (phoneNumber == null || StringUtils.isEmpty(phoneNumber)) {
 			logger.info("phone_number不存在");
-			jsonPacked.setResult("user,unlogined");
+			jsonPacked.setResult("notlogin");
 			return jsonPacked;
 		}
 		Page sell_market_page = null;
 		if (sellType != null && Type != null && !StringUtils.isEmpty(sellType) && !StringUtils.isEmpty(Type)) {
 			jsonPacked.setResult("success");
-			sell_market_page = sellerMarketService.findBySellingWayAndBookClass(sellType, Type, new PageRequest(Integer.parseInt(pageNow)-1, Integer.parseInt(pageSize)));
+			sell_market_page = sellerMarketService.findBySellingWayAndBookClass(sellType, Type, new PageRequest(pageNow, pageSize));
 			jsonPacked.getResultSet().add(sell_market_page);
 			return jsonPacked;
 		}
 		if (sellType != null && !StringUtils.isEmpty(sellType)) {
 			jsonPacked.setResult("success");
-			sell_market_page = sellerMarketService.findBySellingWay(sellType, new PageRequest(Integer.parseInt(pageNow)-1, Integer.parseInt(pageSize)));
+			sell_market_page = sellerMarketService.findBySellingWay(sellType, new PageRequest(pageNow, pageSize));
 			jsonPacked.getResultSet().add(sell_market_page);
 			return jsonPacked;
 		}
 		if (Type != null && !StringUtils.isEmpty(Type)) {
 			jsonPacked.setResult("success");
-			sell_market_page = sellerMarketService.findByBookClass(Type, new PageRequest(Integer.parseInt(pageNow)-1, Integer.parseInt(pageSize)));
+			sell_market_page = sellerMarketService.findByBookClass(Type, new PageRequest(pageNow, pageSize));
 			jsonPacked.getResultSet().add(sell_market_page);
 			return jsonPacked;
 		}
 		jsonPacked.setResult("success");
-		sell_market_page = sellerMarketService.findAllByPage(new PageRequest(Integer.parseInt(pageNow)-1, Integer.parseInt(pageSize)));
+		sell_market_page = sellerMarketService.findAllByPage(new PageRequest(pageNow, pageSize));
 		jsonPacked.getResultSet().add(sell_market_page);
 		return jsonPacked;
 	}
@@ -119,13 +138,13 @@ public class SellControl {
 	 * 查看所有卖的书
 	 */
 	@RequestMapping(value="/fragmentBuy",method=RequestMethod.POST, produces = "text/html;charset=utf-8")
-	public @ResponseBody Object fragmentBuy(@RequestParam String pageNow, @RequestParam String pageSize, HttpServletRequest request, HttpServletResponse response)throws JsonGenerationException, JsonMappingException, IOException{
+	public @ResponseBody Object fragmentBuy(@RequestParam Integer pageNow, @RequestParam Integer pageSize, HttpServletRequest request, HttpServletResponse response)throws JsonGenerationException, JsonMappingException, IOException{
 
-		if (pageNow == null || StringUtils.isEmpty(pageNow)) {
-			pageNow = "1";
+		if (pageNow == null ) {
+			pageNow = 1;
 		}
-		if (pageSize == null || StringUtils.isEmpty(pageNow)) {
-			pageSize = "10";
+		if (pageSize == null ) {
+			pageSize = 10;
 		}
 		JsonPacked jsonPacked=new JsonPacked();
 		//获取session中的phoneNumber
@@ -133,32 +152,32 @@ public class SellControl {
 		//检查参数phone_number是否为空
 		if (phoneNumber == null || StringUtils.isEmpty(phoneNumber)) {
 			logger.info("phone_number不存在");
-			jsonPacked.setResult("user,unlogined");
+			jsonPacked.setResult("notlogin");
 			return jsonPacked;
 		}
 
-		Page sell_market_page = sellerMarketService.findAllByPage(new PageRequest(Integer.parseInt(pageNow)-1, Integer.parseInt(pageSize)));
+		Page sell_market_page = sellerMarketService.findAllByPage(new PageRequest(pageNow, pageSize));
 		jsonPacked.setResult("success");
 		jsonPacked.getResultSet().add(sell_market_page);
 		return jsonPacked;
 	}
 	/*
 	 * @author makai
-	 * 创建心愿，
-	 * 接收请求参数，然后save心愿
+	 * 创建卖书，
+	 * 接收请求参数，然后save卖书
 	 */
 	@SuppressWarnings("unused")
 	@RequestMapping(value="/createBuy", method=RequestMethod.POST, produces = "text/html;charset=utf-8")
-	public @ResponseBody JsonPacked createBuy(@RequestParam String BuyBookName,@RequestParam String BuyBookPicture,
+	public @ResponseBody JsonPacked createBuy(@RequestParam String BuyBookName,@RequestParam("BuyBookPicture") MultipartFile BuyBookPicture,
 			@RequestParam String BuyBookAuthor, @RequestParam String Type,@RequestParam String BuyBookDescript,
-			@RequestParam String SellType,@RequestParam String price, @RequestParam String newOrold,HttpServletRequest request, HttpServletResponse response){
+			@RequestParam String SellType,@RequestParam String price, @RequestParam String newOrold,HttpServletRequest request, HttpServletResponse response) throws Exception{
 		JsonPacked jsonPacked=new JsonPacked();
 		//获取session中的phoneNumber
 		String phoneNumber = (String) request.getSession().getAttribute("phoneNumber");
 		//检查参数phone_number是否为空
 		if (phoneNumber == null || StringUtils.isEmpty(phoneNumber)) {
 			logger.info("phone_number不存在");
-			jsonPacked.setResult("user,unlogined");
+			jsonPacked.setResult("notlogin");
 			return jsonPacked;
 		}
 		User user = userService.findByPhoneNumber(phoneNumber);
@@ -168,9 +187,10 @@ public class SellControl {
 			jsonPacked.setResult("user,null");
 			return jsonPacked;
 		}
-		//书籍图片肯定不是这样的，后面再改
-		if (BuyBookPicture == null || StringUtils.isEmpty(BuyBookPicture)) {
-			logger.info("书籍图片不能为空");
+		logger.info("用户"+phoneNumber+"上传了"+BuyBookPicture.getOriginalFilename()+"并试图创建卖书栏");
+		String url=fileUpLoadService.FileUpload(BuyBookPicture, new Date()+phoneNumber+".jpg"); 
+		if(url==null||url.equals("")||url.isEmpty()){
+			logger.info("url为空");
 			jsonPacked.setResult("BuyBookPicture,null");
 			return jsonPacked;
 		}
@@ -236,7 +256,7 @@ public class SellControl {
 		seller_market.setBookClass(Type);
 		seller_market.setBookDescript(BuyBookDescript);
 		seller_market.setBookName(BuyBookName);
-		seller_market.setBookPicture(BuyBookPicture);
+		seller_market.setBookPicture(url);
 		seller_market.setBookPrice(Double.parseDouble(price));
 		seller_market.setBookSituation(newOrold);
 		seller_market.setCreateBy(phoneNumber);
@@ -244,7 +264,7 @@ public class SellControl {
 		seller_market.setSellingWay(SellType);
 		seller_market.setUser_info(user_info);
 		//这两个字段应该是没用的
-		seller_market.setBookOwnerId(user.getId().toString());
+		seller_market.setBookOwnerId(user.getPhoneNumber());
 		seller_market.setOwnerOnlineTime("24小时");
 		//保存
 		sellerMarketService.save(seller_market);

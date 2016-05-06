@@ -28,7 +28,7 @@ public interface IBookListDao extends CrudRepository<BookList, Long>,PagingAndSo
 	@SuppressWarnings("unchecked")
 	public BookList save(BookList bookList);
 
-	@Query("select a from BookList a Order by a.createDate")
+	@Query("select a from BookList a Order by a.createDate desc")
 	public Page<BookList> findAllBookList(Pageable pageable);
 
 	public Iterable<BookList> findAll();

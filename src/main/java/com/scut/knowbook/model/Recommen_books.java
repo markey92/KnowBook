@@ -22,11 +22,11 @@ public class Recommen_books extends BaseModel implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 	
-	@Column(name="recommener_id", nullable= false)
+	@Column(name="recommener_id", nullable= true)
 	private String recommenerId;
 	
 	@Column(name="book_score", nullable= false)
-	private int bookScore;
+	private double bookScore;
 	
 	@Column(name="title_image", nullable= false)
 	private String titleImage;
@@ -90,14 +90,19 @@ public class Recommen_books extends BaseModel implements Serializable {
 	public void setBookList(Set<BookList> bookList) {
 		this.bookList = bookList;
 	}
+	@JsonIgnore
 	public String getRecommenerId() {
 		return recommenerId;
 	}
 	public void setRecommenerId(String recommenerId) {
 		this.recommenerId = recommenerId;
 	}
-	public int getBookScore() {
+	
+	public double getBookScore() {
 		return bookScore;
+	}
+	public void setBookScore(double bookScore) {
+		this.bookScore = bookScore;
 	}
 	public void setBookScore(int bookScore) {
 		this.bookScore = bookScore;

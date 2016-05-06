@@ -9,6 +9,8 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.MappedSuperclass;
 
+import org.codehaus.jackson.annotate.JsonIgnore;
+
 @MappedSuperclass
 public class BaseModel implements Serializable{
 
@@ -41,6 +43,7 @@ public class BaseModel implements Serializable{
 		this.id = id;
 	}
 	
+	@JsonIgnore
 	public String getCreateBy() {
 		return createBy;
 	}
@@ -57,6 +60,7 @@ public class BaseModel implements Serializable{
 		this.createDate = createDate;
 	}
 
+	@JsonIgnore
 	public int getState() {
 		return state;
 	}
