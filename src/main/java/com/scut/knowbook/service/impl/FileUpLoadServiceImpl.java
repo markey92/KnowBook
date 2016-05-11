@@ -13,10 +13,26 @@ import com.scut.knowbook.service.IFileUpLoadService;
 @Service("fileUpLoadService")
 public class FileUpLoadServiceImpl implements IFileUpLoadService {
 
-	public String FileUpload(MultipartFile file, String fileName) throws IOException {
+	public String FileUpload(MultipartFile file,String fileName) throws IOException {
 		// TODO Auto-generated method stub
 		if(!file.isEmpty()){
 			FileUtils.copyInputStreamToFile(file.getInputStream(), new File("e:\\javass\\knowbook\\src\\main\\webapp\\static\\images", fileName));
+			file.transferTo(new File(fileName)); 
+			file.getInputStream().close();
+		}
+		else{
+			return null;
+		}
+		String url="/images/"+fileName;
+		return url;
+	}
+
+	public String anotherFileUpload(MultipartFile file, String savePath, String fileName) throws IOException {
+		// TODO Auto-generated method stub
+		if(!file.isEmpty()){
+			FileUtils.copyInputStreamToFile(file.getInputStream(), new File(savePath, fileName));
+			file.transferTo(new File(fileName)); 
+			file.getInputStream().close();
 		}
 		else{
 			return null;

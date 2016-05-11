@@ -33,5 +33,5 @@ public interface IBookListDao extends CrudRepository<BookList, Long>,PagingAndSo
 
 	public Iterable<BookList> findAll();
 
-	public List<BookList> findByCreateDateBetween(Timestamp max, Timestamp min);
+	public Page<BookList> findByCreateDateBetween(Timestamp max, Timestamp min,Pageable pageable);
 }

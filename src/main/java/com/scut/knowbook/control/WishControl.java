@@ -5,7 +5,9 @@ import java.io.IOException;
 import java.sql.Timestamp;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
@@ -55,7 +57,7 @@ public class WishControl {
 	/**
 	 * 按id查找某本确定的书
 	 */
-	@RequestMapping(value="/detailWant",method=RequestMethod.POST, produces = "text/html;charset=utf-8")
+	@RequestMapping(value="/detailWant",method=RequestMethod.GET, produces = "text/html;charset=utf-8")
 	public @ResponseBody Object detailWant(@RequestParam long WantBookId, HttpServletRequest request, HttpServletResponse response)throws JsonGenerationException, JsonMappingException, IOException{
 
 		JsonPacked jsonPacked=new JsonPacked();
@@ -74,20 +76,24 @@ public class WishControl {
         }
 	    Wish_platform wish_platform = wishPlatformService.findById(WantBookId);
 		jsonPacked.setResult("success");
-		jsonPacked.getResultSet().add(wish_platform);
+//		jsonPacked.getResultSet().add(wish_platform);
+		Map<String, String> map=new ConcurrentHashMap<String, String>();
+		map.put("WantBookPay", wish_platform.getWishPay());
+		map.put("UserPicture", wish_platform.getUser_info().getHeadPicture());
+		jsonPacked.getResultSet().add(map);
 		return jsonPacked;
 	}
 	/**
 	 * 按类型查看所有心愿
 	 */
-	@RequestMapping(value="/fragmentWantSome",method=RequestMethod.POST, produces = "text/html;charset=utf-8")
-	public @ResponseBody Object fragmentWantSome(@RequestParam String pageNow, @RequestParam String pageSize, @RequestParam String type, HttpServletRequest request, HttpServletResponse response)throws JsonGenerationException, JsonMappingException, IOException{
+	@RequestMapping(value="/fragmentWantSome",method=RequestMethod.GET, produces = "text/html;charset=utf-8")
+	public @ResponseBody Object fragmentWantSome(@RequestParam Integer page, @RequestParam Integer pageSize, @RequestParam String type, HttpServletRequest request, HttpServletResponse response)throws JsonGenerationException, JsonMappingException, IOException{
 
-		if (pageNow == null || StringUtils.isEmpty(pageNow)) {
-			pageNow = "1";
+		if (page == null) {
+			page = 0;
 		}
-		if (pageSize == null || StringUtils.isEmpty(pageNow)) {
-			pageSize = "10";
+		if (pageSize == null) {
+			pageSize = 10;
 		}
 		JsonPacked jsonPacked=new JsonPacked();
 		//获取session中的phoneNumber
@@ -103,22 +109,29 @@ public class WishControl {
 			jsonPacked.setResult("type,null");
 			return jsonPacked;
         }
-		Page wish_platform_page = wishPlatformService.findByBookClassPage(type, new PageRequest(Integer.parseInt(pageNow)-1, Integer.parseInt(pageSize)));
+		Page<Wish_platform> wish_platform_page = wishPlatformService.findByBookClassPage(type, new PageRequest(page, pageSize));
+		for(Wish_platform wish_platform : wish_platform_page){
+			jsonPacked.getResultSet().add(wish_platform);
+			Map<String, Object> map=new ConcurrentHashMap<String, Object>();
+			map.put("UserName", wish_platform.getUser_info().getUser().getUserName());
+			map.put("UserSex", wish_platform.getUser_info().getUser().getSex());
+			jsonPacked.getResultSet().add(map);
+		}
 		jsonPacked.setResult("success");
-		jsonPacked.getResultSet().add(wish_platform_page);
+//		jsonPacked.getResultSet().add(wish_platform_page);
 		return jsonPacked;
 	}
 	/**
 	 * 查看所有心愿
 	 */
-	@RequestMapping(value="/fragmentWant",method=RequestMethod.POST, produces = "text/html;charset=utf-8")
-	public @ResponseBody Object fragmentWant(@RequestParam String pageNow, @RequestParam String pageSize, HttpServletRequest request, HttpServletResponse response)throws JsonGenerationException, JsonMappingException, IOException{
+	@RequestMapping(value="/fragmentWant",method=RequestMethod.GET, produces = "text/html;charset=utf-8")
+	public @ResponseBody Object fragmentWant(@RequestParam Integer page, @RequestParam Integer pageSize, HttpServletRequest request, HttpServletResponse response)throws JsonGenerationException, JsonMappingException, IOException{
 
-		if (pageNow == null || StringUtils.isEmpty(pageNow)) {
-			pageNow = "1";
+		if (page == null ) {
+			page = 0;
 		}
-		if (pageSize == null || StringUtils.isEmpty(pageNow)) {
-			pageSize = "10";
+		if (pageSize == null ) {
+			pageSize = 10;
 		}
 		JsonPacked jsonPacked=new JsonPacked();
 		//获取session中的phoneNumber
@@ -130,9 +143,16 @@ public class WishControl {
 			return jsonPacked;
 		}
 
-		Page wish_platform_page = wishPlatformService.findAllByPage(new PageRequest(Integer.parseInt(pageNow)-1, Integer.parseInt(pageSize)));
+		Page<Wish_platform> wish_platform_page = wishPlatformService.findAllByPage(new PageRequest(page,pageSize));
+		for(Wish_platform wish_platform:wish_platform_page){
+			jsonPacked.getResultSet().add(wish_platform);
+			Map<String, String> map=new ConcurrentHashMap<String, String>();
+			map.put("UserName", wish_platform.getUser_info().getUser().getUserName());
+			map.put("UserSex", wish_platform.getUser_info().getUser().getSex());
+			jsonPacked.getResultSet().add(map);
+		}
 		jsonPacked.setResult("success");
-		jsonPacked.getResultSet().add(wish_platform_page);
+//		jsonPacked.getResultSet().add(wish_platform_page);
 		return jsonPacked;
 	}
 	/**
@@ -147,13 +167,13 @@ public class WishControl {
 		//检查参数phone_number是否为空
 		if (phoneNumber == null || StringUtils.isEmpty(phoneNumber)) {
 			logger.info("phone_number不存在");
-			jsonPacked.setResult("user,unlogined");
+			jsonPacked.setResult("notlogin");
 			return jsonPacked;
 		}
 		User user = userService.findByPhoneNumber(phoneNumber);
 		if (user == null) {
 			logger.info("user不存在");
-			jsonPacked.setResult("user,null");
+			jsonPacked.setResult("null");
 			return jsonPacked;
 		}
 		User_info user_info = user.getUser_info();
@@ -261,9 +281,9 @@ public class WishControl {
 		//保存
 		wishPlatformService.save(wish_platform);
 		userInfoService.save(user_info);
-		Page<Wish_platform> wishPlatformPage = wishPlatformService.findAllByPage(new PageRequest(0, 10));
+//		Page<Wish_platform> wishPlatformPage = wishPlatformService.findAllByPage(new PageRequest(0, 10));
 		jsonPacked.setResult("success");
-		jsonPacked.getResultSet().add(wishPlatformPage);
+//		jsonPacked.getResultSet().add(wishPlatformPage);
 		return jsonPacked;
 	}
 

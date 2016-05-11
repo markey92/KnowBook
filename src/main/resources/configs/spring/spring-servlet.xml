@@ -16,6 +16,7 @@
 	                 	http://www.springframework.org/schema/mvc
 	                    http://www.springframework.org/schema/mvc/spring-mvc-4.0.xsd">               
 	
+     
        <mvc:resources mapping="/resources/**" location="/static/" />
     <!-- 配置页面成为静态资源，这个项目中所有页面都当成是一个静态资源，里面的动态数据都是在页面加载过程中通过js来从后台获取的 -->
     <mvc:resources mapping="/views/**" location="/static/views/" />
@@ -28,12 +29,13 @@
         </mvc:message-converters>  
     </mvc:annotation-driven>  
   
-  	<!--200*1024*1024即200M resolveLazily属性启用是为了推迟文件解析，以便捕获文件大小异常 -->
+  	<!--200*1024*1024即20M resolveLazily属性启用是为了推迟文件解析，以便捕获文件大小异常 -->
 	<bean id="multipartResolver"
 		class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
-		<property name="maxUploadSize" value="209715200" />
+		<property name="maxUploadSize" value="20971520" />
 		<property name="defaultEncoding" value="UTF-8" />
 		<property name="resolveLazily" value="true" />
+		<property name="maxInMemorySize" value="20971520"/>
 	</bean>
 	
     <bean id="stringHttpMessageConverter"  

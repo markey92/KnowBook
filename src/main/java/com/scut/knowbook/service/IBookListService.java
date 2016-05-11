@@ -22,9 +22,9 @@ public interface IBookListService {
 	
 	public Page<BookList> findAllBookList(Pageable pageable);
 	
-	public List<BookList> findMostBookList();
+	public List<BookList> findMostBookList(Pageable pageable);
 	
-	public List<BookList> findByCreateDateBetween(Timestamp max, Timestamp min);
+	public List<BookList> findByCreateDateBetween(Timestamp max, Timestamp min,Pageable pageable);
 	
-	public List<BookList> findHotBookList(Timestamp max, Timestamp min);
+	public List<BookList> findHotBookList(Timestamp max, Timestamp min,Pageable pageable);
 }

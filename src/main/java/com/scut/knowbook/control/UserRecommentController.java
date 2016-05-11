@@ -147,8 +147,9 @@ public class UserRecommentController {
 		}
 		jsonPacked.setResult("success");
 		jsonPacked.getResultSet().add(recommen_books);
-		Map<String, Integer> rebooks=new ConcurrentHashMap<String, Integer>();
+		Map<String, Object> rebooks=new ConcurrentHashMap<String, Object>();
 		rebooks.put("commentCount", recommen_books.getComments().size());
+		rebooks.put("bookScore", recommen_books.getBookScore());
 		jsonPacked.getResultSet().add(rebooks);											//返回评论数量
 		Page<Comments> comments=commentsService.findBy(id,new PageRequest(0, 2));		//这里应该用分页调用，第一次取出两条评论，之后每页取出十条评论
 		if(comments!=null){
@@ -211,9 +212,15 @@ public class UserRecommentController {
 		if(comments!=null){
 			logger.info(comments.getCommentContent()+":"+comments.getCommentScore());
 			comments.setRecommen_books(recommen_books);
+			double bookScore=comments.getRecommen_books().getBookScore();
+			comments.getRecommen_books().setBookScore((bookScore+comments.getCommentScore())/2);
 			comments.setUser(user);
 			commentsService.save(comments);
 			jsonPacked.setResult("success");  			//客户端写入自己的评论数据之后，返回success，后请求/detailshowbook进行评论刷新
+			Map<String, Object> map=new ConcurrentHashMap<String, Object>();
+			map.put("bookScore", comments.getRecommen_books().getBookScore());
+			map.put("commentCount", comments.getRecommen_books().getComments().size());
+			jsonPacked.getResultSet().add(map);
 			return jsonPacked;
 		}
 		else{
@@ -240,14 +247,21 @@ public class UserRecommentController {
 			jsonPacked.setResult("id,null");
 			return jsonPacked;
 		}
-		Map<String, Object> comb=new ConcurrentHashMap<String, Object>();
-		comb.put("CommentUser", comments.getUser());
-		jsonPacked.getResultSet().add(comb);
+//		Map<String, Object> comb=new ConcurrentHashMap<String, Object>();
+//		comb.put("CommentUser", comments.getUser());
+//		jsonPacked.getResultSet().add(comb);
 		Page<Son_comments> son_comments=sonCommentsService.findByCommentsId(commentId, new PageRequest(page, 10));
 		for(Son_comments son_comment:son_comments){
 			jsonPacked.getResultSet().add(son_comment);
 			Map<String, Object> map=new ConcurrentHashMap<String, Object>();
-			map.put("sonCommentUser", son_comment.getUser());
+			String sonCommentUser=son_comment.getUser().getUserName();
+			String headPicture=son_comment.getUser().getUser_info().getHeadPicture();
+			if(sonCommentUser==null||sonCommentUser.isEmpty()){
+				logger.info("用户名不存在，改用phoneNumber作为username");
+				sonCommentUser=son_comment.getUser().getPhoneNumber();
+			}
+			map.put("sonCommentUser", sonCommentUser);
+			map.put("headPicture", headPicture);
 			jsonPacked.getResultSet().add(map);
 		}
 		jsonPacked.setResult("success");

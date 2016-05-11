@@ -61,6 +61,7 @@ public class BookList extends BaseModel implements Serializable {
 		this.bookListName = bookListName;
 	}
 
+	@JsonIgnore
 	public String getBookId() {
 		return bookId;
 	}

@@ -73,12 +73,12 @@ public class LoginController {
 	/**
 	 * 用户注册验证
 	 */
-	@RequestMapping(value="/registe", method = RequestMethod.POST)
+	@RequestMapping(value="/registe", method = RequestMethod.POST,produces = "text/html;charset=utf-8")
 	public @ResponseBody Object registe(String phoneNumber, String password,HttpServletRequest request) throws JsonGenerationException, JsonMappingException, IOException{
 		
 		logger.info("注册ip为："+request.getRemoteAddr());
 		JsonPacked jsonPacked=new JsonPacked();
-		User user=new User();
+		
 		if(phoneNumber==null||password==null){
 			logger.info("null");
 			logger.info(request.getRemoteAddr());
@@ -90,6 +90,7 @@ public class LoginController {
 			jsonPacked.setResult("error");
 			return jsonPacked;
 		}
+		User user=new User();
 		user.setPhoneNumber(phoneNumber);
 		user.setPassword(password);
 		
@@ -210,11 +211,22 @@ public class LoginController {
 	 * @throws Exception 
 	 */
 	@RequestMapping(value="/doUpload", method=RequestMethod.POST, produces = "text/html;charset=utf-8")
-	public @ResponseBody Object doUploadFile(@RequestParam("file") MultipartFile file,HttpServletRequest request) throws Exception{
+	public @ResponseBody Object doUploadFile(@RequestParam("file") MultipartFile file,HttpServletRequest request)  throws JsonGenerationException, JsonMappingException, IOException{
 		logger.info(request.getRemoteAddr()+"上传了文件:"+file.getOriginalFilename());
 		JsonPacked jsonPacked=new JsonPacked();
 		String phoneNumber=(String) request.getSession().getAttribute("phoneNumber");
-		String url=fileUpLoadService.FileUpload(file,new Date()+phoneNumber+".jpg"); 
+		String savePath=request.getSession().getServletContext().getRealPath("/static/images").toLowerCase();
+//		String savePath="e:\\tomcat\\webapps\\knowbook\\static\\images";
+		String fileName=System.currentTimeMillis()+phoneNumber+".jpg";
+		logger.info("保存路径为："+savePath);
+		String url=null;
+		try {
+			url = fileUpLoadService.anotherFileUpload(file, savePath, fileName);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			jsonPacked.setResult("fileTooBig");
+			return jsonPacked;
+		}
 //		String url="/images/"+phoneNumber+file.getOriginalFilename();
 		if(url.isEmpty()||url==null||url.equals("")){
 			jsonPacked.setResult("null");

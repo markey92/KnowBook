@@ -12,6 +12,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 import org.codehaus.jackson.annotate.JsonIgnore;
+import org.codehaus.jackson.annotate.JsonProperty;
 
 
 @Entity
@@ -22,7 +23,7 @@ public class Wish_platform extends BaseModel implements Serializable {
 	
 	@Column(name="wisher_id", nullable = true, length = 11)
 	private String wisherId;
-	
+
 	@Column(name="book_name", nullable= false, length = 11)
 	private String bookName;
 	
@@ -53,12 +54,16 @@ public class Wish_platform extends BaseModel implements Serializable {
 	public void setWishPay(String wishPay) {
 		this.wishPay = wishPay;
 	}
+	
+	@JsonProperty("distance")
 	public String getWishLocation() {
 		return wishLocation;
 	}
 	public void setWishLocation(String wishLocation) {
 		this.wishLocation = wishLocation;
 	}
+	
+	@JsonProperty("WantBookPicture")
 	public String getWantBookPicture() {
 		return wantBookPicture;
 	}
@@ -72,12 +77,16 @@ public class Wish_platform extends BaseModel implements Serializable {
 	public void setUser_info(User_info user_info) {
 		this.user_info = user_info;
 	}
+	
+	@JsonIgnore
 	public String getWisherId() {
 		return wisherId;
 	}
 	public void setWisherId(String wisherId) {
 		this.wisherId = wisherId;
 	}
+	
+	@JsonProperty("WantBookName")
 	public String getBookName() {
 		return bookName;
 	}
@@ -96,6 +105,8 @@ public class Wish_platform extends BaseModel implements Serializable {
 	public void setWishContent(String wishContent) {
 		this.wishContent = wishContent;
 	}
+	
+	@JsonProperty("WantBookAuthor")
 	public String getBookAuthor() {
 		return bookAuthor;
 	}
