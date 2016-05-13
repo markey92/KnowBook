@@ -121,11 +121,4 @@ public class Seller_market extends BaseModel implements Serializable {
 	public void setBookAuthor(String bookAuthor) {
 		this.bookAuthor = bookAuthor;
 	}
-	@Override
-	public String toString() {
-		return "Seller_market [bookName=" + bookName + ", bookPrice=" + bookPrice + ", bookOwnerId=" + bookOwnerId
-				+ ", bookSituation=" + bookSituation + ", bookClass=" + bookClass + ", ownerOnlineTime="
-				+ ownerOnlineTime + ", bookAuthor=" + bookAuthor + ", sellingWay=" + sellingWay + "]";
-	}
-	
 }

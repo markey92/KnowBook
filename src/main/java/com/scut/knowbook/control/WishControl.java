@@ -80,6 +80,9 @@ public class WishControl {
 		Map<String, String> map=new ConcurrentHashMap<String, String>();
 		map.put("WantBookPay", wish_platform.getWishPay());
 		map.put("UserPicture", wish_platform.getUser_info().getHeadPicture());
+		map.put("qq", wish_platform.getUser_info().getQq());
+		map.put("weixin", wish_platform.getUser_info().getWeixin());
+		map.put("phoneNumber", wish_platform.getUser_info().getUser().getPhoneNumber());
 		jsonPacked.getResultSet().add(map);
 		return jsonPacked;
 	}
@@ -179,7 +182,13 @@ public class WishControl {
 		User_info user_info = user.getUser_info();
 		Set<Wish_platform> wish_platforms = user_info.getWish_platform();
 		jsonPacked.setResult("success");
-		jsonPacked.getResultSet().add(wish_platforms);
+		for(Wish_platform wish_platform:wish_platforms){
+			jsonPacked.getResultSet().add(wish_platform);
+			Map<String, String> map=new ConcurrentHashMap<String, String>();
+			map.put("UserName", wish_platform.getUser_info().getUser().getUserName());
+			map.put("UserSex", wish_platform.getUser_info().getUser().getSex());
+			jsonPacked.getResultSet().add(map);
+		}
 		return jsonPacked;
 	}
 	/*
@@ -210,7 +219,7 @@ public class WishControl {
 		}
 		//书籍图片肯定不是这样的，后面再改
 		logger.info("用户"+phoneNumber+"上传了"+WantBookPicture.getOriginalFilename()+"并试图创建心愿");
-		String url=fileUpLoadService.FileUpload(WantBookPicture, new Date()+phoneNumber+".jpg"); 
+		String url=fileUpLoadService.FileUpload(WantBookPicture, System.currentTimeMillis()+phoneNumber+".jpg"); 
 		if(url==null||url.equals("")||url.isEmpty()){
 			logger.info("url为空");
 			jsonPacked.setResult("WantBookPicture,null");
@@ -287,4 +296,30 @@ public class WishControl {
 		return jsonPacked;
 	}
 
+	/**
+	 * 删除自己的心愿记录
+	 */
+	@RequestMapping(value="/deleteWish",method=RequestMethod.GET, produces = "text/html;charset=utf-8")
+	public @ResponseBody Object deleteWish(@RequestParam long WantBookId, HttpServletRequest request, HttpServletResponse response)throws JsonGenerationException, JsonMappingException, IOException{
+
+		JsonPacked jsonPacked=new JsonPacked();
+		//获取session中的phoneNumber
+		String phoneNumber = (String) request.getSession().getAttribute("phoneNumber");
+		//检查参数phone_number是否为空
+		if (phoneNumber == null || StringUtils.isEmpty(phoneNumber)) {
+			logger.info("phone_number不存在");
+			jsonPacked.setResult("user,unlogined");
+			return jsonPacked;
+		}
+		Wish_platform wish_platform = wishPlatformService.findById(WantBookId);
+        if(wish_platform ==null){
+			logger.info("WantBookId不存在");
+			jsonPacked.setResult("id,null");
+			return jsonPacked;
+        }
+        wishPlatformService.delete(wish_platform);
+        logger.info("成功删除id为"+WantBookId+"的心愿记录");
+		jsonPacked.setResult("success");
+		return jsonPacked;
+	}
 }

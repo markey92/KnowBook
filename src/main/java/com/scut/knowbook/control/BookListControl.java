@@ -385,6 +385,35 @@ public class BookListControl {
 		return jsonPacked;
 	}
 	/**
+	 * 删除自己的书单
+	 */
+	@RequestMapping(value="/deleteBooklist", method = RequestMethod.GET,  produces = "text/html;charset=utf-8")
+	public @ResponseBody Object deleteBooklist(Long booklistId,HttpServletRequest request) throws JsonGenerationException, JsonMappingException, IOException{
+		
+		logger.info("请求删除的booklistId为："+booklistId);
+		JsonPacked jsonPacked=new JsonPacked();
+		String phoneNumber=(String)request.getSession().getAttribute("phoneNumber");		//得到session里面的phoneNumber属性
+		User user=userService.findByPhoneNumber(phoneNumber);
+		if(user==null){
+			jsonPacked.setResult("notlogin");
+			return jsonPacked;
+		}
+		BookList bookList=bookListService.findById(booklistId);
+		if(bookList==null){
+			jsonPacked.setResult("id,null");
+			return jsonPacked;
+		}
+		//删除书单，要删除所有收藏他的用户的关系，要删除书单所有的收藏书籍的关系，最后才能删除书单
+		bookList.getUsers().removeAll(bookList.getUsers());
+		for(Recommen_books recommen_book:bookList.getRecommen_books()){
+			recommen_book.getBookList().remove(bookList);
+		}
+		bookListService.delete(bookList);
+		jsonPacked.setResult("success");
+		logger.info("成功删除id为:"+booklistId+" 的书单");
+		return jsonPacked;
+	}
+	/**
 	 * detailmyCreateBooklist查看书单详情
 	 */
 	@RequestMapping(value="/detailmyCreateBooklist", method = RequestMethod.GET,  produces = "text/html;charset=utf-8")

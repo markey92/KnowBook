@@ -86,14 +86,14 @@ public class SellControl {
 	    map.put("userPicture", seller_market.getUser_info().getHeadPicture());
 	    map.put("userName", seller_market.getUser_info().getUser().getUserName());
 	    map.put("userSex", seller_market.getUser_info().getUser().getSex());
-	    return map;
+//	    return map;
 	    
-//		jsonPacked.setResult("success");
-//		jsonPacked.getResultSet().add(seller_market);
-//		return jsonPacked;
+		jsonPacked.setResult("success");
+		jsonPacked.getResultSet().add(map);
+		return jsonPacked;
 	}
 	/**
-	 * 按类型和售卖方法查看所有心愿
+	 * 按类型和售卖方法查看所有卖书
 	 */
 	@RequestMapping(value="/fragmentBuySome",method=RequestMethod.GET, produces = "text/html;charset=utf-8")
 	public @ResponseBody Object fragmentBuySome(@RequestParam String sellType, @RequestParam String Type, @RequestParam Integer page, @RequestParam Integer pageSize, HttpServletRequest request, HttpServletResponse response)throws JsonGenerationException, JsonMappingException, IOException{
@@ -331,8 +331,40 @@ public class SellControl {
 		Set<Seller_market> seller_markets = user_info.getSeller_market();
 		jsonPacked.setResult("success");
 		if (seller_markets != null) {
-			jsonPacked.getResultSet().add(seller_markets);
+			for(Seller_market seller_market:seller_markets){
+				jsonPacked.getResultSet().add(seller_market);
+				Map<String,Object> map=new ConcurrentHashMap<String, Object>();
+				map.put("BuyBookUser", seller_market.getUser_info().getUser().getUserName());
+				map.put("BuyBookUserSex", seller_market.getUser_info().getUser().getSex());
+				jsonPacked.getResultSet().add(map);
+			}
 		}
-		return jsonPacked;		
+		return jsonPacked;
+	}
+	/**
+	 * 删除自己的卖书记录
+	 */
+	@RequestMapping(value="/deleteSellBook",method=RequestMethod.GET, produces = "text/html;charset=utf-8")
+	public @ResponseBody Object deleteSellBook(@RequestParam long BuyBookId, HttpServletRequest request, HttpServletResponse response)throws JsonGenerationException, JsonMappingException, IOException{
+
+		JsonPacked jsonPacked=new JsonPacked();
+		//获取session中的phoneNumber
+		String phoneNumber = (String) request.getSession().getAttribute("phoneNumber");
+		//检查参数phone_number是否为空
+		if (phoneNumber == null || StringUtils.isEmpty(phoneNumber)) {
+			logger.info("phone_number不存在");
+			jsonPacked.setResult("notlogin");
+			return jsonPacked;
+		}
+		Seller_market seller_market = sellerMarketService.findById(BuyBookId);
+		if (seller_market == null) {
+			logger.info("WantBookId不存在");
+			jsonPacked.setResult("id,null");
+			return jsonPacked;
+		}
+	   sellerMarketService.delete(seller_market);
+	   logger.info("成功删除id为"+BuyBookId+"的卖书记录");
+		jsonPacked.setResult("success");
+		return jsonPacked;
 	}
 }

@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.scut.knowbook.dao.IWishPlatformDao;
 import com.scut.knowbook.model.Wish_platform;
@@ -42,11 +43,13 @@ public class WishPlatformServiceImpl implements IWishPlatformService {
 		return this.findByBookClass(bookClass);
 	}
 
+	@Transactional
 	public Wish_platform save(Wish_platform wish_platform) {
 		// TODO Auto-generated method stub
 		return this.wishPlatformDao.save(wish_platform);
 	}
 
+	@Transactional
 	public void delete(Wish_platform wish_platform) {
 		// TODO Auto-generated method stub
 		this.wishPlatformDao.delete(wish_platform);

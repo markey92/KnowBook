@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.scut.knowbook.dao.ISellerMarketDao;
 import com.scut.knowbook.model.Seller_market;
@@ -51,11 +52,13 @@ public class SellerMarketServiceImpl implements ISellerMarketService {
 	}
 
 
+	@Transactional
 	public Seller_market save(Seller_market seller_market) {
 		// TODO Auto-generated method stub
 		return this.sellerMarketDao.save(seller_market);
 	}
 
+	@Transactional
 	public void delete(Seller_market seller_market) {
 		// TODO Auto-generated method stub
 		this.sellerMarketDao.delete(seller_market);
