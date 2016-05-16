@@ -16,6 +16,7 @@ import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
 import org.codehaus.jackson.annotate.JsonIgnore;
+import org.springframework.beans.factory.parsing.Location;
 
 @Entity
 @Table(name="user_info")
@@ -31,6 +32,9 @@ public class User_info extends BaseModel implements Serializable {
 	
 	@Column(name="headPicture",nullable=true,length=11)
 	private String headPicture;
+	
+	@Column(name="location",nullable=true,length=11)
+	private String location;
 	
 	@OneToOne
 	private User user;
@@ -98,5 +102,13 @@ public class User_info extends BaseModel implements Serializable {
 //				+ getCreateDate() + "]";
 //	}
 //	
+
+	public String getLocation() {
+		return location;
+	}
+
+	public void setLocation(String location) {
+		this.location = location;
+	}
 
 }

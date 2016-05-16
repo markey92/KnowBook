@@ -285,8 +285,15 @@ public class WishControl {
 		wish_platform.setCreateDate(new Timestamp(System.currentTimeMillis()));
 		wish_platform.setUser_info(user_info);
 		wish_platform.setWishContent(WantBookContent);
-		wish_platform.setWishLocation(WishPostiton);
 		wish_platform.setWishPay(WantBookPay);
+		
+		
+		//使用geohash算法将wishPostion换算成geohash编码，从而使经纬度坐标能用一个单一变量代替，在数据库可排序,最后一个参数默认为40
+		String geoHashWishPostiton=wishPlatformService.geohashEncode(WishPostiton, 50);
+		wish_platform.setWishLocation(geoHashWishPostiton);
+		logger.info("输入的地理位置为："+WishPostiton);
+		logger.info("写入的地理位置为："+geoHashWishPostiton);
+		
 		//保存
 		wishPlatformService.save(wish_platform);
 		userInfoService.save(user_info);

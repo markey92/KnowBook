@@ -1,7 +1,9 @@
 package com.scut.knowbook.service.impl;
 
 import java.util.ArrayList;
+import java.util.List;
 
+import org.junit.Assert;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -11,6 +13,12 @@ import org.springframework.transaction.annotation.Transactional;
 import com.scut.knowbook.dao.IWishPlatformDao;
 import com.scut.knowbook.model.Wish_platform;
 import com.scut.knowbook.service.IWishPlatformService;
+
+import com.scut.knowbook.geohash.BoundingBox;
+import com.scut.knowbook.geohash.GeoHash;
+import com.scut.knowbook.geohash.queries.GeoHashBoundingBoxQuery;
+import com.scut.knowbook.geohash.util.BoundingBoxGeoHashIterator;
+import com.scut.knowbook.geohash.util.TwoGeoHashBoundingBox;
 
 @Service("wishPlatformService")
 public class WishPlatformServiceImpl implements IWishPlatformService {
@@ -65,6 +73,26 @@ public class WishPlatformServiceImpl implements IWishPlatformService {
 			Pageable pageable) {
 		// TODO Auto-generated method stub
 		return wishPlatformDao.findByTypeAndPage(type, pageable);
+	}
+
+	public String geohashEncode(String Location,int numberOfBits) {
+		// TODO Auto-generated method stub
+		String[] Locations=Location.split(",");
+		if(Locations.length==2){
+			double latitude=Double.parseDouble(Locations[0]);
+			double longitude=Double.parseDouble(Locations[1]);
+			GeoHash geoHash=GeoHash.withBitPrecision(latitude, longitude, numberOfBits);
+			return geoHash.toBase32();
+		}
+		else{
+			return null;
+		}
+	}
+
+	public String geohashDecode(String geoHashLocation) {
+		// TODO Auto-generated method stub
+		GeoHash decodedHash = GeoHash.fromGeohashString(geoHashLocation);
+		return decodedHash.getBoundingBoxCenterPoint().toString();
 	}
 
 }

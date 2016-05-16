@@ -26,4 +26,8 @@ public interface IWishPlatformService  {
 	public Page<Wish_platform> findAllByPage(Pageable pageable);
 	
 	public Page<Wish_platform> findByBookClassPage(String type, Pageable pageable);
+	
+	public String geohashEncode(String Location,int numberOfBits);
+	
+	public String geohashDecode(String geoHashLocation);
 } 

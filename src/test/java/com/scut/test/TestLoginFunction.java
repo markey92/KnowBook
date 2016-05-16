@@ -23,6 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.scut.knowbook.control.LoginController;
+import com.scut.knowbook.geohash.GeoHash;
 import com.scut.knowbook.model.BookList;
 import com.scut.knowbook.model.Comments;
 import com.scut.knowbook.model.Recommen_books;
@@ -34,10 +35,12 @@ import com.scut.knowbook.service.IBookListService;
 import com.scut.knowbook.service.ICommentsService;
 import com.scut.knowbook.service.IRecommenBooksService;
 import com.scut.knowbook.service.ISonCommentsService;
+import com.scut.knowbook.service.IUserInfoService;
 import com.scut.knowbook.service.IUserService;
 import com.scut.knowbook.service.impl.BookListServiceImpl;
 import com.scut.knowbook.service.impl.RecommenBooksServiceImpl;
 import com.scut.knowbook.service.impl.SonCommentsServiceImpl;
+import com.scut.knowbook.service.impl.UserInfoServiceImpl;
 
 
 /** 声明用的是Spring的测试类 **/
@@ -55,6 +58,9 @@ public class TestLoginFunction {
 	
 	@Resource(name = "userService")
 	private IUserService userService;
+	
+	@Resource(name = "userInfoService")
+	private IUserInfoService userInfoService;
 	
 	@Resource(name="recommenBooksService")
 	private IRecommenBooksService recommenBooksService;
@@ -124,7 +130,39 @@ public class TestLoginFunction {
 			System.out.println(recommen_book.getBookName());
 		}
 	}
+	
 	@Test
+	public void geoHashTest(){
+		String Location="39.92324, 116.3906";
+		int numberOfBits=30;
+		String[] Locations=Location.split(",");
+		if(Locations.length==2){
+			double latitude=Double.parseDouble(Locations[0]);
+			double longitude=Double.parseDouble(Locations[1]);
+			System.out.println(latitude+","+longitude);
+			GeoHash geoHash=GeoHash.withBitPrecision(latitude, longitude, numberOfBits);
+			System.out.println(geoHash.toBase32());
+			System.out.println("--------------------------------");
+			String geoHashLocation=geoHash.toBase32();
+			GeoHash decodedHash = GeoHash.fromGeohashString(geoHashLocation);
+			System.out.println(decodedHash.getBoundingBoxCenterPoint().toString());
+		}
+	}
+	
+	@Test
+	public void geoHashTest2(){
+		String locationMode="wx4g0e";
+		List<User_info> user_infos=userInfoService.peopleAround("%"+locationMode+"%");
+		if (user_infos==null) {
+			System.out.println("null");
+		}
+		for(User_info user_info:user_infos){
+			System.out.println(user_info.getQq());
+		}
+		System.out.println("--------------");
+	}
+	
+	/*@Test
 	public void findMostBooklist(){
 		
 		List<BookList> booklists=bookListService.findMostBookList();
@@ -164,6 +202,22 @@ public class TestLoginFunction {
 	public void uploadFile(){
 		BookList bookList=bookListService.findById(1l);
 		System.out.println(bookList.getBooklistPicture());
+	}*/
+	
+	@Test
+	public void checkbooklist(){
+		BookList bookList=bookListService.findById(1l);
+		Recommen_books recommen_books=recommenBooksService.findById(4l);
+		for(Recommen_books recommen_book:bookList.getRecommen_books()){
+			System.out.println(recommen_book.getBookName());
+		}
+		bookList.getRecommen_books().remove(recommen_books);
+		for(Recommen_books recommen_book:bookList.getRecommen_books()){
+			System.out.println(recommen_book.getBookName()+"====");
+		}
+		bookListService.save(bookList);
+		recommenBooksService.save(recommen_books);
+		System.out.println(recommen_books.getBookList());
 	}
 }
 	

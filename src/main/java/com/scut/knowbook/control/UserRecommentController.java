@@ -210,7 +210,7 @@ public class UserRecommentController {
 			return jsonPacked;
 		}
 		if(comments!=null){
-			logger.info(comments.getCommentContent()+":"+comments.getCommentScore());
+			logger.info("写评论:"+comments.getCommentContent()+":"+comments.getCommentScore());
 			comments.setRecommen_books(recommen_books);
 			double bookScore=comments.getRecommen_books().getBookScore();
 			comments.getRecommen_books().setBookScore((bookScore+comments.getCommentScore())/2);
@@ -337,6 +337,85 @@ public class UserRecommentController {
 		for(Recommen_books recommen_book:recommen_books){
 			jsonPacked.getResultSet().add(recommen_book);
 		}
+		jsonPacked.setResult("success");
+		return jsonPacked;
+	}
+	/**
+	 * 删除自己推荐的书籍
+	 */
+	@RequestMapping(value="/deleteBook",method=RequestMethod.GET,produces="text/html;charset=utf-8")
+	public @ResponseBody Object deleteBook(long bookId,HttpServletRequest request)throws JsonGenerationException,JsonMappingException,IOException{
+		JsonPacked jsonPacked=new JsonPacked();
+		String phoneNumber=(String) request.getSession().getAttribute("phoneNumber");
+		User user=userService.findByPhoneNumber(phoneNumber);
+		if(user==null){
+			jsonPacked.setResult("notlogin");
+			return jsonPacked;
+		}
+		Recommen_books recommen_book=recommenBooksService.findById(bookId);
+		if(recommen_book==null){
+			jsonPacked.setResult("id,null");
+			return jsonPacked;
+		}
+		for(Comments comment:recommen_book.getComments()){
+			for(Son_comments son_comment:comment.getSon_comments()){
+				logger.info("删除子评论 :"+son_comment.getCommentContent());
+				sonCommentsService.delete(son_comment);
+			}
+			logger.info("删除评论:"+comment.getCommentContent());
+			commentsService.delete(comment);
+		}
+		recommen_book.getBookList().remove(recommen_book.getBookList());
+		logger.info("删除推荐平台的书籍 "+bookId);
+		recommenBooksService.delete(recommen_book);
+		jsonPacked.setResult("success");
+		return jsonPacked;
+	}
+	/**
+	 * 删除用户自己的评论
+	 */
+	@RequestMapping(value="/deleteComment",method=RequestMethod.GET,produces="text/html;charset=utf-8")
+	public @ResponseBody Object deleteComment(long commentId,HttpServletRequest request)throws JsonGenerationException,JsonMappingException,IOException{
+		JsonPacked jsonPacked=new JsonPacked();
+		String phoneNumber=(String) request.getSession().getAttribute("phoneNumber");
+		User user=userService.findByPhoneNumber(phoneNumber);
+		if(user==null){
+			jsonPacked.setResult("notlogin");
+			return jsonPacked;
+		}
+		Comments comment=commentsService.findById(commentId);
+		if(comment==null){
+			jsonPacked.setResult("id,null");
+			return jsonPacked;
+		}
+//		comment.getSon_comments().removeAll(comment.getSon_comments());
+		for(Son_comments son_comment:comment.getSon_comments()){
+			son_comment.setComments(null);
+			sonCommentsService.delete(son_comment);
+		}
+		commentsService.delete(comment);
+		jsonPacked.setResult("success");
+		return jsonPacked;
+	}
+	/**
+	 * 删除用户自己的zi评论
+	 */
+	@RequestMapping(value="/deleteSonComment",method=RequestMethod.GET,produces="text/html;charset=utf-8")
+	public @ResponseBody Object deleteSonComment(long sonCommentId,HttpServletRequest request)throws JsonGenerationException,JsonMappingException,IOException{
+		JsonPacked jsonPacked=new JsonPacked();
+		String phoneNumber=(String) request.getSession().getAttribute("phoneNumber");
+		User user=userService.findByPhoneNumber(phoneNumber);
+		if(user==null){
+			jsonPacked.setResult("notlogin");
+			return jsonPacked;
+		}
+		Son_comments son_comment=sonCommentsService.findById(sonCommentId);
+		if(son_comment==null){
+			jsonPacked.setResult("id,null");
+			return jsonPacked;
+		}
+		son_comment.setComments(null);
+		sonCommentsService.delete(son_comment);
 		jsonPacked.setResult("success");
 		return jsonPacked;
 	}

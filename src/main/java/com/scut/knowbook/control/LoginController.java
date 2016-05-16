@@ -7,6 +7,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
@@ -204,6 +205,73 @@ public class LoginController {
 		}
 		jsonPacked.setResult("success");
 		jsonPacked.getResultSet().add(phoneNumber);
+		return jsonPacked;
+	}
+	/**
+	 * 
+	 */
+	@RequestMapping(value="/myLocation", method = RequestMethod.GET,  produces = "text/html;charset=utf-8")
+	public @ResponseBody Object myLocation(String location,HttpServletRequest request) throws JsonGenerationException, JsonMappingException, IOException{
+		
+		JsonPacked jsonPacked=new JsonPacked();
+		//获取session中的phoneNumber
+		String phoneNumber = (String) request.getSession().getAttribute("phoneNumber");
+		//检查参数phone_number是否为空
+		if (phoneNumber == null || StringUtils.isEmpty(phoneNumber)) {
+			logger.info("phone_number不存在");
+			jsonPacked.setResult("notlogin");
+			return jsonPacked;
+		}
+		User user = userService.findByPhoneNumber(phoneNumber);
+		if (user == null) {
+			logger.info("user不存在");
+			jsonPacked.setResult("null");
+			return jsonPacked;
+		}
+		User_info user_info = user.getUser_info();
+		
+		//这是要进行geohash算法
+		String geoHashLocation=userInfoService.geohashEncode(location, 40);
+		user_info.setLocation(geoHashLocation);
+		logger.info("geohash编码前的location为："+location);
+		logger.info("geohash编码后的location为："+geoHashLocation);
+		jsonPacked.setResult("success");
+		jsonPacked.getResultSet().add(phoneNumber);
+		return jsonPacked;
+	}
+	@RequestMapping(value="/getPeopleAround", method = RequestMethod.GET,  produces = "text/html;charset=utf-8")
+	public @ResponseBody Object getPeopleAround(HttpServletRequest request) throws JsonGenerationException, JsonMappingException, IOException{
+		
+		JsonPacked jsonPacked=new JsonPacked();
+		//获取session中的phoneNumber
+		String phoneNumber = (String) request.getSession().getAttribute("phoneNumber");
+		//检查参数phone_number是否为空
+		if (phoneNumber == null || StringUtils.isEmpty(phoneNumber)) {
+			logger.info("phone_number不存在");
+			jsonPacked.setResult("notlogin");
+			return jsonPacked;
+		}
+		User user = userService.findByPhoneNumber(phoneNumber);
+		if (user == null) {
+			logger.info("user不存在");
+			jsonPacked.setResult("null");
+			return jsonPacked;
+		}
+		User_info user_info = user.getUser_info();
+		
+		//这是要进行geohash解码算法
+		if(user_info.getLocation()==null){
+			jsonPacked.setResult("error");
+			return jsonPacked;
+		}
+		String locationMode=user_info.getLocation().substring(0, 5);
+		List<User_info> user_infos=userInfoService.peopleAround(locationMode);
+		jsonPacked.setResult("success");
+		for(User_info userInfoTemp:user_infos){
+			String decode=userInfoService.geohashDecode(userInfoTemp.getLocation());
+			userInfoTemp.setLocation(decode);
+			jsonPacked.getResultSet().add(userInfoTemp);
+		}
 		return jsonPacked;
 	}
 	/**

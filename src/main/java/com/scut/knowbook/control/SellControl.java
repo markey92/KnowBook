@@ -363,7 +363,7 @@ public class SellControl {
 			return jsonPacked;
 		}
 	   sellerMarketService.delete(seller_market);
-	   logger.info("成功删除id为"+BuyBookId+"的卖书记录");
+	   	logger.info("成功删除id为"+BuyBookId+"的卖书记录");
 		jsonPacked.setResult("success");
 		return jsonPacked;
 	}
