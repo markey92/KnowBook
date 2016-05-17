@@ -11,6 +11,8 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
+import org.codehaus.jackson.annotate.JsonIgnore;
+
 
 @Entity
 @Table(name="seller_market")
@@ -43,15 +45,6 @@ public class Seller_market extends BaseModel implements Serializable {
 	@Column(name="selling_way", nullable= false)
 	private String sellingWay;
 	
-	@Column(name="location",nullable=true)
-	private Integer bookLocation;
-	
-	public Integer getBookLocation() {
-		return bookLocation;
-	}
-	public void setBookLocation(Integer bookLocation) {
-		this.bookLocation = bookLocation;
-	}
 	public String getBookPicture() {
 		return bookPicture;
 	}

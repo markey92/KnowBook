@@ -269,6 +269,7 @@ public class LoginController {
 		//这是要进行geohash算法
 		String geoHashLocation=userInfoService.geohashEncode(location, 40);
 		user_info.setLocation(geoHashLocation);
+		userInfoService.save(user_info);
 		logger.info("geohash编码前的location为："+location);
 		logger.info("geohash编码后的location为："+geoHashLocation);
 		jsonPacked.setResult("success");

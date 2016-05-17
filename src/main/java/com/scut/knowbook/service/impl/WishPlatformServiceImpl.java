@@ -104,7 +104,8 @@ public class WishPlatformServiceImpl implements IWishPlatformService {
 	public Object findByUser_infoLocationLike(String locationMode, Integer locationRange) {
 		// TODO Auto-generated method stub
 		if(locationMode==null||locationMode.isEmpty()||locationRange>8||locationRange<1){
-			return null;
+			jsonPacked.setResult("error");
+			return jsonPacked;
 		}
 		List<Wish_platform> wishPlatforms2;
 		if(locationRange==8){
@@ -117,11 +118,20 @@ public class WishPlatformServiceImpl implements IWishPlatformService {
 		}
 		for(Wish_platform wish_platform:wishPlatforms2){
 			jsonPacked.getResultSet().add(wish_platform);
-			Map<String, Integer> map=new HashMap<String, Integer>();
+			Map<String, Object> map=new HashMap<String, Object>();
+			map.put("UserName", wish_platform.getUserinfo().getUser().getUserName());
+			map.put("UserSex", wish_platform.getUserinfo().getUser().getSex());
 			map.put("locationRange", locationRange);
 			jsonPacked.getResultSet().add(map);
 		}
-		return jsonPacked;
+		if(jsonPacked.getResultSet().size()<1){
+			jsonPacked.setResult("nodata");
+			return jsonPacked;
+		}
+		jsonPacked.setResult("success");
+		JsonPacked jsonPackedResult=jsonPacked;
+		jsonPacked=new JsonPacked();
+		return jsonPackedResult;
 	}
 
 }

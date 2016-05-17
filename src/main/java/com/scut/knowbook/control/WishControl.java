@@ -1,10 +1,7 @@
 package com.scut.knowbook.control;
 
-import java.awt.print.Pageable;
 import java.io.IOException;
 import java.sql.Timestamp;
-import java.util.Date;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -107,6 +104,9 @@ public class WishControl {
 			jsonPacked.setResult("user,unlogined");
 			return jsonPacked;
 		}
+		User user=userService.findByPhoneNumber(phoneNumber);
+		User_info user_info=user.getUser_info();
+		String location=user_info.getLocation();
         if(type == null || StringUtils.isEmpty(type)){
 			logger.info("type不存在");
 			jsonPacked.setResult("type,null");
@@ -118,6 +118,8 @@ public class WishControl {
 			Map<String, Object> map=new ConcurrentHashMap<String, Object>();
 			map.put("UserName", wish_platform.getUserinfo().getUser().getUserName());
 			map.put("UserSex", wish_platform.getUserinfo().getUser().getSex());
+			Integer locaionNum=CompareLocation(location, wish_platform.getUserinfo().getLocation(), location.length());
+			map.put("locationRange", locaionNum.toString());
 			jsonPacked.getResultSet().add(map);
 		}
 		jsonPacked.setResult("success");
@@ -128,14 +130,12 @@ public class WishControl {
 	 * 查看所有心愿
 	 */
 	@RequestMapping(value="/fragmentWant",method=RequestMethod.GET, produces = "text/html;charset=utf-8")
-	public @ResponseBody Object fragmentWant(@RequestParam Integer page, @RequestParam Integer pageSize, HttpServletRequest request, HttpServletResponse response)throws JsonGenerationException, JsonMappingException, IOException{
+	public @ResponseBody Object fragmentWant(@RequestParam Integer locationRange, HttpServletRequest request, HttpServletResponse response)throws JsonGenerationException, JsonMappingException, IOException{
 
-		if (page == null ) {
-			page = 0;
+		if (locationRange == null ) {
+			locationRange = 5;
 		}
-		if (pageSize == null ) {
-			pageSize = 10;
-		}
+		
 		JsonPacked jsonPacked=new JsonPacked();
 		//获取session中的phoneNumber
 		String phoneNumber = (String) request.getSession().getAttribute("phoneNumber");
@@ -145,22 +145,27 @@ public class WishControl {
 			jsonPacked.setResult("user,unlogined");
 			return jsonPacked;
 		}
-
-		Page<Wish_platform> wish_platform_page = wishPlatformService.findAllByPage(new PageRequest(page,pageSize));
-		for(Wish_platform wish_platform:wish_platform_page){
-			jsonPacked.getResultSet().add(wish_platform);
-			Map<String, String> map=new ConcurrentHashMap<String, String>();
-			map.put("UserName", wish_platform.getUserinfo().getUser().getUserName());
-			map.put("UserSex", wish_platform.getUserinfo().getUser().getSex());
-			jsonPacked.getResultSet().add(map);
+		User user=userService.findByPhoneNumber(phoneNumber);
+		User_info user_info=user.getUser_info();
+		String locationMode=user_info.getLocation();
+//		Page<Wish_platform> wish_platform_page = wishPlatformService.findAllByPage(new PageRequest(page,pageSize));
+//		for(Wish_platform wish_platform:wish_platform_page){
+//			jsonPacked.getResultSet().add(wish_platform);
+//			Map<String, String> map=new ConcurrentHashMap<String, String>();
+//			map.put("UserName", wish_platform.getUserinfo().getUser().getUserName());
+//			map.put("UserSex", wish_platform.getUserinfo().getUser().getSex());
+//			jsonPacked.getResultSet().add(map);
+//		}
+		jsonPacked=(JsonPacked) wishPlatformService.findByUser_infoLocationLike(locationMode, locationRange);
+		for(Object object:jsonPacked.getResultSet()){
+			logger.info("返回的心愿"+object);
 		}
 		jsonPacked.setResult("success");
-//		jsonPacked.getResultSet().add(wish_platform_page);
 		return jsonPacked;
 	}
 	/**
 	 * 查看自己的心愿
-	 */
+	 */  
 	@RequestMapping(value="/myWish",method=RequestMethod.GET, produces = "text/html;charset=utf-8")
 	public @ResponseBody Object mywish(HttpServletRequest request, HttpServletResponse response)throws JsonGenerationException, JsonMappingException, IOException{
 
@@ -328,5 +333,20 @@ public class WishControl {
         logger.info("成功删除id为"+WantBookId+"的心愿记录");
 		jsonPacked.setResult("success");
 		return jsonPacked;
+	}
+	public Integer CompareLocation(String o1,String o2,int num){
+		if(o1.isEmpty()||o1==null||o2.isEmpty()||o2==null){
+			return null;
+		}
+		if(num<0||num>o1.length()||num>o2.length()){
+			return null;
+		}
+		if(o1.substring(0,num).equals(o2.substring(0,num))){
+			logger.info("位置字符串比较值"+num);
+			return num;
+		}
+		else{
+			return CompareLocation(o1, o2, num-1);
+		}
 	}
 }

@@ -55,7 +55,8 @@ public class Wish_platform extends BaseModel implements Serializable {
 		this.wishPay = wishPay;
 	}
 	
-	@JsonProperty("distance")
+//	@JsonProperty("distance")
+	@JsonIgnore
 	public String getWishLocation() {
 		return wishLocation;
 	}

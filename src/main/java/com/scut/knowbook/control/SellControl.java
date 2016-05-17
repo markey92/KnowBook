@@ -143,7 +143,7 @@ public class SellControl {
 				map.put("BuyBookUser", seller_market.getUserinfo().getUser().getUserName());
 				map.put("BuyBookUserSex", seller_market.getUserinfo().getUser().getSex());
 				Integer locaionNum=CompareLocation(location, seller_market.getUserinfo().getLocation(), location.length());
-				map.put("location", locaionNum.toString());
+				map.put("locationRange", locaionNum.toString());
 				jsonPacked.getResultSet().add(map);
 			}
 			return jsonPacked;
@@ -158,7 +158,7 @@ public class SellControl {
 				map.put("BuyBookUser", seller_market.getUserinfo().getUser().getUserName());
 				map.put("BuyBookUserSex", seller_market.getUserinfo().getUser().getSex());
 				Integer locaionNum=CompareLocation(location, seller_market.getUserinfo().getLocation(), location.length());
-				map.put("location", locaionNum.toString());
+				map.put("locationRange", locaionNum.toString());
 				jsonPacked.getResultSet().add(map);
 			}
 			return jsonPacked;
@@ -204,6 +204,8 @@ public class SellControl {
 //		}
 //		jsonPacked=(JsonPacked) sellerMarketService.findByUserinfoLocationLike(locationMode,locationRange);
 		jsonPacked=(JsonPacked) sellerMarketService.findByUser_infoLocationLike(locationMode, locationRange);
+		logger.info(jsonPacked.getResultSet().size());
+		logger.info(jsonPacked);
 		return jsonPacked;
 	}
 	/*
@@ -393,6 +395,7 @@ public class SellControl {
 			return null;
 		}
 		if(o1.substring(0,num).equals(o2.substring(0,num))){
+			logger.info(o1+":"+o2);
 			logger.info("位置字符串比较值"+num);
 			return num;
 		}

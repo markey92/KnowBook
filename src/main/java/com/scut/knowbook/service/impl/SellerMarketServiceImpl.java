@@ -104,32 +104,56 @@ public class SellerMarketServiceImpl implements ISellerMarketService {
 	public Object findByUser_infoLocationLike(String locationMode,Integer locationRange) {
 		// TODO Auto-generated method stub
 		if(locationMode==null||locationMode.isEmpty()||locationRange>8||locationRange<1){
-			return null;
+			jsonPacked.setResult("error");
+			return jsonPacked;
 		}
 		List<Seller_market> sellerMarkets2;
 		if(locationRange==8){
 			sellerMarkets2=this.sellerMarketDao.findByUserinfoLocationLike("%"+locationMode.substring(0,locationRange)+"%");
+			logger.info("sellerMarketservice方法操作中");
+			logger.info(sellerMarkets2);
 		}
 		else{
 			List<Seller_market> sellerMarkets=this.sellerMarketDao.findByUserinfoLocationLike("%"+locationMode.substring(0,locationRange+1)+"%");
 			sellerMarkets2=this.sellerMarketDao.findByUserinfoLocationLike("%"+locationMode.substring(0,locationRange)+"%");
+			logger.info("sellerMarketservice方法操作中"+locationRange);
+			logger.info(sellerMarkets);
+			logger.info(sellerMarkets2);
 			sellerMarkets2.removeAll(sellerMarkets);
+			logger.info(sellerMarkets2);
 		}
+		logger.info("sellerMarket方法插入数据前的jsonpacked");
+		logger.info(jsonPacked.getResultSet().size());
 		for(Seller_market seller_market:sellerMarkets2){
 			jsonPacked.getResultSet().add(seller_market);
-			Map<String, Integer> map=new HashMap<String, Integer>();
+			Map<String, Object> map=new HashMap<String, Object>();
+			map.put("BuyBookUser", seller_market.getUserinfo().getUser().getUserName());
+			map.put("BuyBookUserSex", seller_market.getUserinfo().getUser().getSex());
 			map.put("locationRange", locationRange);
 			jsonPacked.getResultSet().add(map);
 		}
-		return jsonPacked;
+		if(jsonPacked.getResultSet().size()<1){
+			jsonPacked.setResult("nodata");
+			return jsonPacked;
+		}
+		jsonPacked.setResult("success");
+		JsonPacked jsonPackedResult=jsonPacked;
+		this.jsonPacked=new JsonPacked();
+		return jsonPackedResult;
 	}
 
 	public Object findByUserinfoLocationLike(String locationMode,Integer locationRange) {
 		// TODO Auto-generated method stub
 		if(locationMode==null||locationMode.isEmpty()){
-			return null;
+			jsonPacked.setResult("error");
+			return jsonPacked;
 		}
 		if(locationMode.length()<locationRange){
+			if(jsonPacked.getResultSet().size()<1){
+				jsonPacked.setResult("nodata");
+				return jsonPacked;
+			}
+			jsonPacked.setResult("success");
 			JsonPacked jsonPackedResult=jsonPacked;
 			jsonPacked=new JsonPacked();
 			return jsonPackedResult;
@@ -138,8 +162,10 @@ public class SellerMarketServiceImpl implements ISellerMarketService {
 		for(Seller_market seller_market:sellerMarkets){
 			if(!(jsonPacked.getResultSet().contains(seller_market))){
 				jsonPacked.getResultSet().add(seller_market);
-				Map<String, Integer> map=new ConcurrentHashMap<String, Integer>();
+				Map<String, Object> map=new ConcurrentHashMap<String, Object>();
 				map.put("locationRange", locationMode.length());
+				map.put("BuyBookUser", seller_market.getUserinfo().getUser().getUserName());
+				map.put("BuyBookUserSex", seller_market.getUserinfo().getUser().getSex());
 				jsonPacked.getResultSet().add(map);
 			}
 		}
