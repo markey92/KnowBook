@@ -30,7 +30,7 @@ public class User_info extends BaseModel implements Serializable {
 	@Column(name="weixin",nullable=true,length=20)
 	private String weixin;
 	
-	@Column(name="headPicture",nullable=true,length=11)
+	@Column(name="headPicture",nullable=true)
 	private String headPicture;
 	
 	@Column(name="location",nullable=true,length=11)
@@ -39,10 +39,10 @@ public class User_info extends BaseModel implements Serializable {
 	@OneToOne
 	private User user;
 	
-	@OneToMany(targetEntity = Seller_market.class, mappedBy = "user_info")
+	@OneToMany(targetEntity = Seller_market.class, mappedBy = "userinfo")
 	private Set<Seller_market> seller_market=new HashSet<Seller_market>();
 	
-	@OneToMany(targetEntity = Wish_platform.class, mappedBy = "user_info")
+	@OneToMany(targetEntity = Wish_platform.class, mappedBy = "userinfo")
 	private Set<Wish_platform> wish_platform=new HashSet<Wish_platform>();
 	
 	@JsonIgnore

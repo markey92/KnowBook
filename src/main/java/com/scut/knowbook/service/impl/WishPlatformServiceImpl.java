@@ -1,7 +1,9 @@
 package com.scut.knowbook.service.impl;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.junit.Assert;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,7 +13,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.scut.knowbook.dao.IWishPlatformDao;
+import com.scut.knowbook.model.Seller_market;
 import com.scut.knowbook.model.Wish_platform;
+import com.scut.knowbook.model.OP.JsonPacked;
 import com.scut.knowbook.service.IWishPlatformService;
 
 import com.scut.knowbook.geohash.BoundingBox;
@@ -36,6 +40,8 @@ public class WishPlatformServiceImpl implements IWishPlatformService {
 		return this.wishPlatformDao.findByBookName(bookName);
 	}
 
+	private JsonPacked jsonPacked=new JsonPacked();
+	
 	public Wish_platform findByWisherId(String wisherId) {
 		// TODO Auto-generated method stub
 		return this.wishPlatformDao.findByWisherId(wisherId);
@@ -93,6 +99,29 @@ public class WishPlatformServiceImpl implements IWishPlatformService {
 		// TODO Auto-generated method stub
 		GeoHash decodedHash = GeoHash.fromGeohashString(geoHashLocation);
 		return decodedHash.getBoundingBoxCenterPoint().toString();
+	}
+
+	public Object findByUser_infoLocationLike(String locationMode, Integer locationRange) {
+		// TODO Auto-generated method stub
+		if(locationMode==null||locationMode.isEmpty()||locationRange>8||locationRange<1){
+			return null;
+		}
+		List<Wish_platform> wishPlatforms2;
+		if(locationRange==8){
+			wishPlatforms2=this.wishPlatformDao.findByUserinfoLocationLike("%"+locationMode.substring(0,locationRange)+"%");
+		}
+		else{
+			List<Wish_platform> wishPlatforms=this.wishPlatformDao.findByUserinfoLocationLike("%"+locationMode.substring(0,locationRange+1)+"%");
+			wishPlatforms2=this.wishPlatformDao.findByUserinfoLocationLike("%"+locationMode.substring(0,locationRange)+"%");
+			wishPlatforms2.removeAll(wishPlatforms);
+		}
+		for(Wish_platform wish_platform:wishPlatforms2){
+			jsonPacked.getResultSet().add(wish_platform);
+			Map<String, Integer> map=new HashMap<String, Integer>();
+			map.put("locationRange", locationRange);
+			jsonPacked.getResultSet().add(map);
+		}
+		return jsonPacked;
 	}
 
 }

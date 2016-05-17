@@ -191,6 +191,21 @@ public class UserRecommentController {
 		if(comments!=null){
 			for(Comments comment:comments){
 				jsonPacked.getResultSet().add(comment);
+				Map<String, Object> map=new ConcurrentHashMap<String, Object>();		//返回评论者信息
+				if(comment.getUser().getUserName()==null){
+					map.put("commentUser", "null");
+				}
+				else{
+					map.put("commentUser", comment.getUser().getUserName());
+				}
+				if(comment.getUser().getUser_info().getHeadPicture()==null){
+					map.put("headPicture", "null");
+				}
+				else{
+					map.put("headPicture", comment.getUser().getUser_info().getHeadPicture());
+				}
+				map.put("sonCommentCount",comment.getSon_comments().size());
+				jsonPacked.getResultSet().add(map);
 			}
 		}
 		return jsonPacked;

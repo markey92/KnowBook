@@ -46,7 +46,7 @@ public class Wish_platform extends BaseModel implements Serializable {
 	private String wantBookPicture;
 	
 	@ManyToOne(targetEntity =User_info.class)
-	private User_info user_info=new User_info();
+	private User_info userinfo=new User_info();
 	
 	public String getWishPay() {
 		return wishPay;
@@ -70,17 +70,17 @@ public class Wish_platform extends BaseModel implements Serializable {
 	public void setWantBookPicture(String wantBookPicture) {
 		this.wantBookPicture = wantBookPicture;
 	}
-	@JsonIgnore
-	public User_info getUser_info() {
-		return user_info;
-	}
-	public void setUser_info(User_info user_info) {
-		this.user_info = user_info;
-	}
 	
 	@JsonIgnore
 	public String getWisherId() {
 		return wisherId;
+	}
+	@JsonIgnore
+	public User_info getUserinfo() {
+		return userinfo;
+	}
+	public void setUserinfo(User_info userinfo) {
+		this.userinfo = userinfo;
 	}
 	public void setWisherId(String wisherId) {
 		this.wisherId = wisherId;

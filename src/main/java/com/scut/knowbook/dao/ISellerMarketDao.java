@@ -1,5 +1,7 @@
 package com.scut.knowbook.dao;
 
+import java.util.List;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.repository.CrudRepository;
@@ -34,4 +36,6 @@ public interface ISellerMarketDao extends CrudRepository<Seller_market, Long> {
 	public Seller_market save(Seller_market seller_market);
 	
 	public Page<Seller_market> findAll(Pageable pageable);
+	
+	public List<Seller_market> findByUserinfoLocationLike(String locationMode);
 }

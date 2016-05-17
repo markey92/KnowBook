@@ -3,6 +3,7 @@ package com.scut.knowbook.control;
 import java.io.IOException;
 import java.sql.Timestamp;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -74,7 +75,7 @@ public class SellControl {
 			return jsonPacked;
         }
 	    Seller_market seller_market = sellerMarketService.findById(BuyBookId);
-	    User_info user_info=seller_market.getUser_info();
+	    User_info user_info=seller_market.getUserinfo();
 	    
 	    Map<String, Object> map=new ConcurrentHashMap<String, Object>();
 	    map.put("bookClass", seller_market.getBookClass());
@@ -83,9 +84,9 @@ public class SellControl {
 	    map.put("qq", user_info.getQq());
 	    map.put("weixin", user_info.getWeixin());
 	    map.put("bookDescript", seller_market.getBookDescript());
-	    map.put("userPicture", seller_market.getUser_info().getHeadPicture());
-	    map.put("userName", seller_market.getUser_info().getUser().getUserName());
-	    map.put("userSex", seller_market.getUser_info().getUser().getSex());
+	    map.put("userPicture", seller_market.getUserinfo().getHeadPicture());
+	    map.put("userName", seller_market.getUserinfo().getUser().getUserName());
+	    map.put("userSex", seller_market.getUserinfo().getUser().getSex());
 //	    return map;
 	    
 		jsonPacked.setResult("success");
@@ -113,16 +114,21 @@ public class SellControl {
 			jsonPacked.setResult("notlogin");
 			return jsonPacked;
 		}
+		User user=userService.findByPhoneNumber(phoneNumber);
+		User_info user_info=user.getUser_info();
+		String location=user_info.getLocation();
 		Page<Seller_market> sell_market_page = null;
 		if (sellType != null && Type != null && !StringUtils.isEmpty(sellType) && !StringUtils.isEmpty(Type)) {
 			jsonPacked.setResult("success");
 			sell_market_page = sellerMarketService.findBySellingWayAndBookClass(sellType, Type, new PageRequest(page, pageSize));
-//			jsonPacked.getResultSet().add(sell_market_page);
+			jsonPacked.getResultSet().add(sell_market_page);
 			for(Seller_market seller_market:sell_market_page){
 				jsonPacked.getResultSet().add(seller_market);
 				Map<String, String> map=new ConcurrentHashMap<String, String>();
-				map.put("BuyBookUser", seller_market.getUser_info().getUser().getUserName());
-				map.put("BuyBookUserSex", seller_market.getUser_info().getUser().getSex());
+				map.put("BuyBookUser", seller_market.getUserinfo().getUser().getUserName());
+				map.put("BuyBookUserSex", seller_market.getUserinfo().getUser().getSex());
+				Integer locaionNum=CompareLocation(location, seller_market.getUserinfo().getLocation(), location.length());
+				map.put("location", locaionNum.toString());
 				jsonPacked.getResultSet().add(map);
 			}
 			return jsonPacked;
@@ -134,8 +140,10 @@ public class SellControl {
 			for(Seller_market seller_market:sell_market_page){
 				jsonPacked.getResultSet().add(seller_market);
 				Map<String, String> map=new ConcurrentHashMap<String, String>();
-				map.put("BuyBookUser", seller_market.getUser_info().getUser().getUserName());
-				map.put("BuyBookUserSex", seller_market.getUser_info().getUser().getSex());
+				map.put("BuyBookUser", seller_market.getUserinfo().getUser().getUserName());
+				map.put("BuyBookUserSex", seller_market.getUserinfo().getUser().getSex());
+				Integer locaionNum=CompareLocation(location, seller_market.getUserinfo().getLocation(), location.length());
+				map.put("location", locaionNum.toString());
 				jsonPacked.getResultSet().add(map);
 			}
 			return jsonPacked;
@@ -147,8 +155,10 @@ public class SellControl {
 			for(Seller_market seller_market:sell_market_page){
 				jsonPacked.getResultSet().add(seller_market);
 				Map<String, String> map=new ConcurrentHashMap<String, String>();
-				map.put("BuyBookUser", seller_market.getUser_info().getUser().getUserName());
-				map.put("BuyBookUserSex", seller_market.getUser_info().getUser().getSex());
+				map.put("BuyBookUser", seller_market.getUserinfo().getUser().getUserName());
+				map.put("BuyBookUserSex", seller_market.getUserinfo().getUser().getSex());
+				Integer locaionNum=CompareLocation(location, seller_market.getUserinfo().getLocation(), location.length());
+				map.put("location", locaionNum.toString());
 				jsonPacked.getResultSet().add(map);
 			}
 			return jsonPacked;
@@ -162,13 +172,10 @@ public class SellControl {
 	 * 查看所有卖的书
 	 */
 	@RequestMapping(value="/fragmentBuy",method=RequestMethod.GET, produces = "text/html;charset=utf-8")
-	public @ResponseBody Object fragmentBuy(@RequestParam Integer page, @RequestParam Integer pageSize, HttpServletRequest request, HttpServletResponse response)throws JsonGenerationException, JsonMappingException, IOException{
+	public @ResponseBody Object fragmentBuy(@RequestParam Integer locationRange,  HttpServletRequest request, HttpServletResponse response)throws JsonGenerationException, JsonMappingException, IOException{
 
-		if (page == null ) {
-			page = 0;
-		}
-		if (pageSize == null ) {
-			pageSize = 10;
+		if (locationRange == null ) {
+			locationRange = 5;
 		}
 		JsonPacked jsonPacked=new JsonPacked();
 		//获取session中的phoneNumber
@@ -179,17 +186,24 @@ public class SellControl {
 			jsonPacked.setResult("notlogin");
 			return jsonPacked;
 		}
-
-		Page<Seller_market> sell_market_page = sellerMarketService.findAllByPage(new PageRequest(page, pageSize));
-		jsonPacked.setResult("success");
-//		jsonPacked.getResultSet().add(sell_market_page);
-		for(Seller_market seller_market:sell_market_page){
-			jsonPacked.getResultSet().add(seller_market);
-			Map<String, String> map=new ConcurrentHashMap<String, String>();
-			map.put("BuyBookUser", seller_market.getUser_info().getUser().getUserName());
-			map.put("BuyBookUserSex", seller_market.getUser_info().getUser().getSex());
-			jsonPacked.getResultSet().add(map);
+		User user=userService.findByPhoneNumber(phoneNumber);
+		User_info user_info=user.getUser_info();
+		if(user_info==null||user_info.getLocation()==null){
+			jsonPacked.setResult("error");
+			return jsonPacked;
 		}
+		String locationMode=user_info.getLocation();
+//		Page<Seller_market> seller_markets=sellerMarketService.findByUser_infoLocationLike(locationMode,new PageRequest(page, pageSize));
+		jsonPacked.setResult("success");
+//		for(Seller_market seller_market:seller_markets){
+//			jsonPacked.getResultSet().add(seller_market);
+//			Map<String, String> map=new ConcurrentHashMap<String, String>();
+//			map.put("BuyBookUser", seller_market.getUserinfo().getUser().getUserName());
+//			map.put("BuyBookUserSex", seller_market.getUserinfo().getUser().getSex());
+//			jsonPacked.getResultSet().add(map);
+//		}
+//		jsonPacked=(JsonPacked) sellerMarketService.findByUserinfoLocationLike(locationMode,locationRange);
+		jsonPacked=(JsonPacked) sellerMarketService.findByUser_infoLocationLike(locationMode, locationRange);
 		return jsonPacked;
 	}
 	/*
@@ -293,7 +307,7 @@ public class SellControl {
 		seller_market.setCreateBy(phoneNumber);
 		seller_market.setCreateDate(new Timestamp(System.currentTimeMillis()));
 		seller_market.setSellingWay(SellType);
-		seller_market.setUser_info(user_info);
+		seller_market.setUserinfo(user_info);
 		//这两个字段应该是没用的
 		seller_market.setBookOwnerId(user.getPhoneNumber());
 		seller_market.setOwnerOnlineTime("24小时");
@@ -301,7 +315,10 @@ public class SellControl {
 		sellerMarketService.save(seller_market);
 		userInfoService.save(user_info);
 		Page<Seller_market> sellMarkeyPage = sellerMarketService.findAllByPage(new PageRequest(0, 10));
-		jsonPacked.setResult("success");
+		if(user_info.getLocation()==null||user_info.getLocation().isEmpty()){
+			jsonPacked.setResult("location,null");
+		}
+		else jsonPacked.setResult("success");
 //		jsonPacked.getResultSet().add(sellMarkeyPage);
 		return jsonPacked;
 	}
@@ -334,8 +351,8 @@ public class SellControl {
 			for(Seller_market seller_market:seller_markets){
 				jsonPacked.getResultSet().add(seller_market);
 				Map<String,Object> map=new ConcurrentHashMap<String, Object>();
-				map.put("BuyBookUser", seller_market.getUser_info().getUser().getUserName());
-				map.put("BuyBookUserSex", seller_market.getUser_info().getUser().getSex());
+				map.put("BuyBookUser", seller_market.getUserinfo().getUser().getUserName());
+				map.put("BuyBookUserSex", seller_market.getUserinfo().getUser().getSex());
 				jsonPacked.getResultSet().add(map);
 			}
 		}
@@ -366,5 +383,21 @@ public class SellControl {
 	   	logger.info("成功删除id为"+BuyBookId+"的卖书记录");
 		jsonPacked.setResult("success");
 		return jsonPacked;
+	}
+	
+	public Integer CompareLocation(String o1,String o2,int num){
+		if(o1.isEmpty()||o1==null||o2.isEmpty()||o2==null){
+			return null;
+		}
+		if(num<0||num>o1.length()||num>o2.length()){
+			return null;
+		}
+		if(o1.substring(0,num).equals(o2.substring(0,num))){
+			logger.info("位置字符串比较值"+num);
+			return num;
+		}
+		else{
+			return CompareLocation(o1, o2, num-1);
+		}
 	}
 }

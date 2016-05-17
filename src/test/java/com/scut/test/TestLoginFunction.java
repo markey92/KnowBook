@@ -27,6 +27,7 @@ import com.scut.knowbook.geohash.GeoHash;
 import com.scut.knowbook.model.BookList;
 import com.scut.knowbook.model.Comments;
 import com.scut.knowbook.model.Recommen_books;
+import com.scut.knowbook.model.Seller_market;
 import com.scut.knowbook.model.Son_comments;
 import com.scut.knowbook.model.User;
 import com.scut.knowbook.model.User_info;
@@ -34,13 +35,17 @@ import com.scut.knowbook.model.OP.JsonPacked;
 import com.scut.knowbook.service.IBookListService;
 import com.scut.knowbook.service.ICommentsService;
 import com.scut.knowbook.service.IRecommenBooksService;
+import com.scut.knowbook.service.ISellerMarketService;
 import com.scut.knowbook.service.ISonCommentsService;
 import com.scut.knowbook.service.IUserInfoService;
 import com.scut.knowbook.service.IUserService;
+import com.scut.knowbook.service.IWishPlatformService;
 import com.scut.knowbook.service.impl.BookListServiceImpl;
 import com.scut.knowbook.service.impl.RecommenBooksServiceImpl;
+import com.scut.knowbook.service.impl.SellerMarketServiceImpl;
 import com.scut.knowbook.service.impl.SonCommentsServiceImpl;
 import com.scut.knowbook.service.impl.UserInfoServiceImpl;
+import com.scut.knowbook.service.impl.WishPlatformServiceImpl;
 
 
 /** 声明用的是Spring的测试类 **/
@@ -73,6 +78,12 @@ public class TestLoginFunction {
 	
 	@Resource
 	private IBookListService bookListService;
+	
+	@Resource(name = "sellerMarketService")
+	private ISellerMarketService sellerMarketService;
+	
+	@Resource()
+	private IWishPlatformService wishPlatformService;
 	
 	@Test
 	public void registe(){
@@ -134,7 +145,7 @@ public class TestLoginFunction {
 	@Test
 	public void geoHashTest(){
 		String Location="39.92324, 116.3906";
-		int numberOfBits=30;
+		int numberOfBits=50;
 		String[] Locations=Location.split(",");
 		if(Locations.length==2){
 			double latitude=Double.parseDouble(Locations[0]);
@@ -142,22 +153,46 @@ public class TestLoginFunction {
 			System.out.println(latitude+","+longitude);
 			GeoHash geoHash=GeoHash.withBitPrecision(latitude, longitude, numberOfBits);
 			System.out.println(geoHash.toBase32());
-			System.out.println("--------------------------------");
-			String geoHashLocation=geoHash.toBase32();
-			GeoHash decodedHash = GeoHash.fromGeohashString(geoHashLocation);
-			System.out.println(decodedHash.getBoundingBoxCenterPoint().toString());
 		}
 	}
 	
 	@Test
 	public void geoHashTest2(){
 		String locationMode="wx4g0e";
-		List<User_info> user_infos=userInfoService.peopleAround("%"+locationMode+"%");
+		Page<User_info> user_infos=userInfoService.peopleAround("%"+locationMode+"%",new PageRequest(0, 10));
 		if (user_infos==null) {
 			System.out.println("null");
 		}
 		for(User_info user_info:user_infos){
 			System.out.println(user_info.getQq());
+		}
+		System.out.println("--------------");
+	}
+	
+	@Test
+	public void geoHashTest3(){
+		String locationMode="wx4g0ec2";
+		JsonPacked jsonPacked=(JsonPacked) wishPlatformService.findByUser_infoLocationLike(locationMode,7);
+		List<Object> seller_markets=jsonPacked.getResultSet();
+		if (seller_markets==null) {
+			System.out.println("null");
+		}
+		for(Object seller_market:seller_markets){
+			System.out.println(seller_market);
+		}
+		System.out.println("--------------");
+	}
+	
+	@Test
+	public void geoHashTest4(){
+		String locationMode="wx4g0ec1";
+		JsonPacked jsonPacked= (JsonPacked) sellerMarketService.findByUserinfoLocationLike(locationMode,5);
+		List<Object> seller_markets=jsonPacked.getResultSet();
+		if (seller_markets==null) {
+			System.out.println("null");
+		}
+		for(Object seller_market:seller_markets){
+			System.out.println(seller_market);
 		}
 		System.out.println("--------------");
 	}

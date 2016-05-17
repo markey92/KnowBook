@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
@@ -18,6 +19,8 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.codehaus.jackson.JsonGenerationException;
 import org.codehaus.jackson.map.JsonMappingException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -110,7 +113,8 @@ public class LoginController {
 	 * 用户数据添加
 	 */
 	@RequestMapping(value="/loginAdd", method = RequestMethod.POST,  produces = "text/html;charset=utf-8")
-	public @ResponseBody Object loginAdd(@RequestParam ("userName") String userName, @RequestParam ("sex") String sex,HttpServletRequest request) throws JsonGenerationException, JsonMappingException, IOException{
+	public @ResponseBody Object loginAdd(@RequestParam ("userName") String userName, @RequestParam ("sex") String sex,MultipartFile headPicture,String location,
+										String qq,String weixin,HttpServletRequest request) throws JsonGenerationException, JsonMappingException, IOException{
 		
 		JsonPacked jsonPacked=new JsonPacked();
 		String phoneNumber=(String)request.getSession().getAttribute("phoneNumber");
@@ -125,10 +129,42 @@ public class LoginController {
 			return jsonPacked;
 		}
 		User user=userService.findByPhoneNumber(phoneNumber);
-		user.setSex(sex);
-		user.setUserName(userName);
+		if(!sex.isEmpty()){
+			user.setSex(sex);
+		}
+		if(!userName.isEmpty()){
+			user.setUserName(userName);
+		}
+		userService.save(user);
+		User_info user_info=user.getUser_info();
+//		String savePath=request.getSession().getServletContext().getRealPath("/static/images").toLowerCase();
+		String savePath="e:\\javass\\knowbook\\src\\main\\webapp\\static\\images";
+		String fileName=System.currentTimeMillis()+phoneNumber+".jpg";
+		logger.info("保存路径为："+savePath);
+		String url=null;
+		try {
+			url = fileUpLoadService.anotherFileUpload(headPicture, savePath, fileName);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			jsonPacked.setResult("fileTooBig");
+			return jsonPacked;
+		}
+		user_info.setHeadPicture(url);
+		String geohashLocation=userInfoService.geohashEncode(location, 40);
+		user_info.setLocation(geohashLocation);
+		logger.info(geohashLocation);
+		if(!qq.isEmpty()){
+			user_info.setQq(qq);
+		}
+		if(!weixin.isEmpty()){
+			user_info.setWeixin(weixin);
+		}
+		userInfoService.save(user_info);
 		userService.save(user);
 		jsonPacked.setResult("success");
+		Map<String, String> map=new ConcurrentHashMap<String, String>();
+		map.put("headPicture", url);
+		jsonPacked.getResultSet().add(map);
 		logger.info("用户添加数据成功");
 		return jsonPacked;
 	}
@@ -265,7 +301,7 @@ public class LoginController {
 			return jsonPacked;
 		}
 		String locationMode=user_info.getLocation().substring(0, 5);
-		List<User_info> user_infos=userInfoService.peopleAround(locationMode);
+		Page<User_info> user_infos=userInfoService.peopleAround(locationMode, new PageRequest(0, 10));
 		jsonPacked.setResult("success");
 		for(User_info userInfoTemp:user_infos){
 			String decode=userInfoService.geohashDecode(userInfoTemp.getLocation());

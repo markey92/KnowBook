@@ -1,5 +1,7 @@
 package com.scut.knowbook.dao;
 
+import java.util.List;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
@@ -29,4 +31,6 @@ public interface IWishPlatformDao extends CrudRepository<Wish_platform, Long>, P
     
 	@Query("select w from Wish_platform w where w.bookClass = ?1")
 	public Page<Wish_platform> findByTypeAndPage(String type, Pageable pageable);
+	
+	public List<Wish_platform> findByUserinfoLocationLike(String locationMode);
 }

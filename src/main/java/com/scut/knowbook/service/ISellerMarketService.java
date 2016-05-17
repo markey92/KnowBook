@@ -1,6 +1,8 @@
 package com.scut.knowbook.service;
 
 
+import java.util.List;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -33,4 +35,8 @@ public interface ISellerMarketService{
 	public void delete(Seller_market seller_market);
 	
 	public Page<Seller_market> findAllByPage(Pageable pageable);
+	
+	public Object findByUser_infoLocationLike(String locationMode,Integer locationRange);
+	
+	public Object findByUserinfoLocationLike(String locationMode,Integer locationRange);
 }

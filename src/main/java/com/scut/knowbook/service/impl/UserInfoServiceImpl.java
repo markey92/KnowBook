@@ -1,9 +1,10 @@
 package com.scut.knowbook.service.impl;
 
-import java.util.List;
-import java.util.Set;
 
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.scut.knowbook.dao.IUserDao;
@@ -20,6 +21,8 @@ public class UserInfoServiceImpl implements IUserInfoService {
 	@Autowired
 	private IUserDao userDao;
 
+	private Logger logger = Logger.getLogger(getClass());
+	
 	public User_info findById(Long id) {
 		// TODO Auto-generated method stub
 		return this.userInfoDao.findById(id);
@@ -41,6 +44,7 @@ public class UserInfoServiceImpl implements IUserInfoService {
 		if(Locations.length==2){
 			double latitude=Double.parseDouble(Locations[0]);
 			double longitude=Double.parseDouble(Locations[1]);
+			logger.info("转化后的经纬度"+latitude+","+longitude);
 			GeoHash geoHash=GeoHash.withBitPrecision(latitude, longitude, numberOfBits);
 			return geoHash.toBase32();
 		}
@@ -55,10 +59,10 @@ public class UserInfoServiceImpl implements IUserInfoService {
 		return decodedHash.getBoundingBoxCenterPoint().toString();
 	}
 
-	public List<User_info> peopleAround(String locationMode) {
+	public Page<User_info> peopleAround(String locationMode,Pageable page) {
 		// TODO Auto-generated method stub
 //		return this.userInfoDao.peopleAround(locationMode);
-		return this.userInfoDao.findByLocationLike(locationMode);
+		return this.userInfoDao.findByLocationLike(locationMode,page);
 	}
 
 }

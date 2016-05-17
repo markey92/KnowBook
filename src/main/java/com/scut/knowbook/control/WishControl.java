@@ -79,10 +79,10 @@ public class WishControl {
 //		jsonPacked.getResultSet().add(wish_platform);
 		Map<String, String> map=new ConcurrentHashMap<String, String>();
 		map.put("WantBookPay", wish_platform.getWishPay());
-		map.put("UserPicture", wish_platform.getUser_info().getHeadPicture());
-		map.put("qq", wish_platform.getUser_info().getQq());
-		map.put("weixin", wish_platform.getUser_info().getWeixin());
-		map.put("phoneNumber", wish_platform.getUser_info().getUser().getPhoneNumber());
+		map.put("UserPicture", wish_platform.getUserinfo().getHeadPicture());
+		map.put("qq", wish_platform.getUserinfo().getQq());
+		map.put("weixin", wish_platform.getUserinfo().getWeixin());
+		map.put("phoneNumber", wish_platform.getUserinfo().getUser().getPhoneNumber());
 		jsonPacked.getResultSet().add(map);
 		return jsonPacked;
 	}
@@ -116,8 +116,8 @@ public class WishControl {
 		for(Wish_platform wish_platform : wish_platform_page){
 			jsonPacked.getResultSet().add(wish_platform);
 			Map<String, Object> map=new ConcurrentHashMap<String, Object>();
-			map.put("UserName", wish_platform.getUser_info().getUser().getUserName());
-			map.put("UserSex", wish_platform.getUser_info().getUser().getSex());
+			map.put("UserName", wish_platform.getUserinfo().getUser().getUserName());
+			map.put("UserSex", wish_platform.getUserinfo().getUser().getSex());
 			jsonPacked.getResultSet().add(map);
 		}
 		jsonPacked.setResult("success");
@@ -150,8 +150,8 @@ public class WishControl {
 		for(Wish_platform wish_platform:wish_platform_page){
 			jsonPacked.getResultSet().add(wish_platform);
 			Map<String, String> map=new ConcurrentHashMap<String, String>();
-			map.put("UserName", wish_platform.getUser_info().getUser().getUserName());
-			map.put("UserSex", wish_platform.getUser_info().getUser().getSex());
+			map.put("UserName", wish_platform.getUserinfo().getUser().getUserName());
+			map.put("UserSex", wish_platform.getUserinfo().getUser().getSex());
 			jsonPacked.getResultSet().add(map);
 		}
 		jsonPacked.setResult("success");
@@ -185,8 +185,8 @@ public class WishControl {
 		for(Wish_platform wish_platform:wish_platforms){
 			jsonPacked.getResultSet().add(wish_platform);
 			Map<String, String> map=new ConcurrentHashMap<String, String>();
-			map.put("UserName", wish_platform.getUser_info().getUser().getUserName());
-			map.put("UserSex", wish_platform.getUser_info().getUser().getSex());
+			map.put("UserName", wish_platform.getUserinfo().getUser().getUserName());
+			map.put("UserSex", wish_platform.getUserinfo().getUser().getSex());
 			jsonPacked.getResultSet().add(map);
 		}
 		return jsonPacked;
@@ -283,7 +283,7 @@ public class WishControl {
 		wish_platform.setBookName(WantBookName);
 		wish_platform.setCreateBy(user.getPhoneNumber());
 		wish_platform.setCreateDate(new Timestamp(System.currentTimeMillis()));
-		wish_platform.setUser_info(user_info);
+		wish_platform.setUserinfo(user_info);
 		wish_platform.setWishContent(WantBookContent);
 		wish_platform.setWishPay(WantBookPay);
 		

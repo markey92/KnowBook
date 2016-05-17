@@ -42,6 +42,16 @@ public class Seller_market extends BaseModel implements Serializable {
 	//SellType
 	@Column(name="selling_way", nullable= false)
 	private String sellingWay;
+	
+	@Column(name="location",nullable=true)
+	private Integer bookLocation;
+	
+	public Integer getBookLocation() {
+		return bookLocation;
+	}
+	public void setBookLocation(Integer bookLocation) {
+		this.bookLocation = bookLocation;
+	}
 	public String getBookPicture() {
 		return bookPicture;
 	}
@@ -63,13 +73,13 @@ public class Seller_market extends BaseModel implements Serializable {
 	
 	@ManyToOne(targetEntity =User_info.class)
 //	@JoinColumn(name = "bookOwner_id", referencedColumnName = "PhoneNumber", nullable = false,insertable=false, updatable=false)
-	private User_info user_info;
+	private User_info userinfo;
 	
-	public User_info getUser_info() {
-		return user_info;
+	public User_info getUserinfo() {
+		return userinfo;
 	}
-	public void setUser_info(User_info user_info) {
-		this.user_info = user_info;
+	public void setUserinfo(User_info userinfo) {
+		this.userinfo = userinfo;
 	}
 	public String getBookName() {
 		return bookName;

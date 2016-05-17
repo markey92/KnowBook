@@ -30,4 +30,6 @@ public interface IWishPlatformService  {
 	public String geohashEncode(String Location,int numberOfBits);
 	
 	public String geohashDecode(String geoHashLocation);
+	
+	public Object findByUser_infoLocationLike(String locationMode,Integer locationRange);
 } 
